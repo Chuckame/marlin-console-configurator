@@ -41,9 +41,7 @@ Notes:
 - When a constant is enabled (profile) and enabled in output with same value (or no value for both): do nothing
 - When a constant is enabled (profile) with value and enabled in output without value: ERROR
 - When a constant is enabled (profile) without value and enabled in output with value: ERROR
-- When a constant is enabled (profile) but disabled in output: remove the prefix `//` and adjust the value from profile without modifying the rest of the line
-    Exception: if the constant contains a value while output have no value: ERROR
-    Exception: if the constant have no value while output contains a value: ERROR 
+- When a constant is enabled (profile) but disabled in output: remove the prefix `//` and adjust the value from profile without modifying the rest of the line. `!!` Exception: if the constant contains a value while output have no value: ERROR. `!!` Exception: if the constant have no value while output contains a value: ERROR 
 - When a constant is not defined in profile while it is in output (enabled or disabled): warn like `Oh, XXX is not defined in profile`
 - When a constant is defined in profile (enabled or disabled), while it isn't into output (non-present): ERROR
 - Can create a profile.yaml from output
