@@ -1,23 +1,9 @@
 # marlin-console-configurator
 
-# Example profile.yaml
-```yaml
-files:
-  - Configuration.h
-  - Configuration_adv.h
-enabled:
-  HEADER_WITH_VALUE_NUMBER: 1
-  HEADER_WITH_VALUE_STRING: hello everyone !
-  HEADER_WITH_VALUE_COMPLEX_STRING: "hello everyone: it's me :D"
-  HEADER_WITH_VALUE_ARRAY: "{ 14, 15, 28 }"
-  HEADER_WITHOUT_VALUE: # ':' is mandatory, even if no value !!
-disabled:
-  - DISABLED_HEADER
-  - DiSaBLeD_HEaDEr2
-```
+[Example profile.yaml](src/test/resources/example/profile.yaml)
 Notes:
 - we don't care about the order
-- we don't care about the constant location (in which file we enable/disable a constant), because if there is missing constant from output files, the script will exit and cancel any modification
+- we don't care about the constant location (in which file we enable/disable a constant), because if there is missing constant from output files, the script will exit without doing any modification
 
 # Regex:
 ```regex
@@ -36,17 +22,17 @@ Notes:
 - output: indicates `Configuration.h` and `Configuration_adv.h`
 
 # Todo
-- When a constant is disabled (profile) but enabled in output: just prefix with `//` without modifying the line
-- When a constant is disabled (profile) and disabled in output: do nothing
-- When a constant is enabled (profile) and enabled in output with same value (or no value for both): do nothing
-- When a constant is enabled (profile) with value and enabled in output without value: ERROR
-- When a constant is enabled (profile) without value and enabled in output with value: ERROR
-- When a constant is enabled (profile) but disabled in output: remove the prefix `//` and adjust the value from profile without modifying the rest of the line. `!!` Exception: if the constant contains a value while output have no value: ERROR. `!!` Exception: if the constant have no value while output contains a value: ERROR 
-- When a constant is not defined in profile while it is in output (enabled or disabled): warn like `Oh, XXX is not defined in profile`
-- When a constant is defined in profile (enabled or disabled), while it isn't into output (non-present): ERROR
-- Can create a profile.yaml from output
+- When a constant is disabled (profileProperties) but enabled in output: just prefix with `//` without modifying the line
+- When a constant is disabled (profileProperties) and disabled in output: do nothing
+- When a constant is enabled (profileProperties) and enabled in output with same value (or no value for both): do nothing
+- When a constant is enabled (profileProperties) with value and enabled in output without value: ERROR
+- When a constant is enabled (profileProperties) without value and enabled in output with value: ERROR
+- When a constant is enabled (profileProperties) but disabled in output: remove the prefix `//` and adjust the value from profileProperties without modifying the rest of the line. `!!` Exception: if the constant contains a value while output have no value: ERROR. `!!` Exception: if the constant have no value while output contains a value: ERROR 
+- When a constant is not defined in profileProperties while it is in output (enabled or disabled): warn like `Oh, XXX is not defined in profileProperties`
+- When a constant is defined in profileProperties (enabled or disabled), while it isn't into output (non-present): ERROR
+- Can create a profileProperties.yaml from output
 - Can create a backup.yaml from output
 
 # Done
 - Regex for parsing constants
-- Design the `profile.yaml`
+- Design the `profileProperties.yaml`

@@ -1,0 +1,4 @@
+#define CONSTANT_WITH_VALUE_ARRAY { 14, 15, 28 }
+#define CONSTANT_WITH_VALUE_NUMBER 1
+
+//#define DiSaBLeD_CoNsTANt2
