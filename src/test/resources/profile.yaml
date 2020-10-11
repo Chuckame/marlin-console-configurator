@@ -1,0 +1,10 @@
+enabled:
+  CONSTANT_WITH_VALUE_ARRAY: '{ 14, 15, 28 }'
+  CONSTANT_WITH_VALUE_NUMBER: 1
+  CONSTANT_WITH_VALUE_COMPLEX_STRING: '"a complex value that requires quotes and\nreturns"'
+  CONSTANT_WITHOUT_VALUE: # ':' is mandatory, even if no value !!
+  CONSTANT_WITH_VALUE_STRING: '"a string value that requires quotes"'
+  WeiRd_conStANt: hey
+disabled:
+  - DISABLED_CONSTANT
+  - DiSaBLeD_CoNsTANt2

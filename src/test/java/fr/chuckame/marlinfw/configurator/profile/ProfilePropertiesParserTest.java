@@ -2,8 +2,6 @@ package fr.chuckame.marlinfw.configurator.profile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import fr.chuckame.marlinfw.configurator.constant.Constant;
-import fr.chuckame.marlinfw.configurator.constant.ConstantLineParser;
 import fr.chuckame.marlinfw.configurator.util.FileHelper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,33 +11,24 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.NoSuchFileException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 class ProfilePropertiesParserTest {
-    public static final Path UNKNOWN_FILE_PATH = Path.of("unknownFile");
-    public static final Path FILE_PATH_1 = Path.of("file1");
-    public static final Path FILE_PATH_2 = Path.of("file2");
-    public static final String CONSTANT_1_NAME = "1";
-    public static final String CONSTANT_1_VALUE = "11";
-    @Mock
-    private ConstantLineParser constantLineParserMock;
+    private final Path FILE_PATH = resourceToPath("profile.yaml");
     @Mock
     private FileHelper fileHelperMock;
     @InjectMocks
@@ -47,53 +36,30 @@ class ProfilePropertiesParserTest {
 
     @Test
     void parseFromFileShouldReturnExpectedProfile() throws IOException {
-        final var profileFilePath = toPath("example/profile.yaml");
-        Mockito.when(fileHelperMock.bytes(profileFilePath)).thenReturn(Mono.just(java.nio.file.Files.readAllBytes(profileFilePath)));
+        Mockito.when(fileHelperMock.bytes(FILE_PATH)).thenReturn(Mono.just(Files.readAllBytes(FILE_PATH)));
 
-        final var profileProperties = profilePropertiesParser.parseFromFile(profileFilePath);
+        final var profileProperties = profilePropertiesParser.parseFromFile(FILE_PATH);
 
-        assertThat(profileProperties.block()).isEqualTo(profileProperties());
+        StepVerifier.create(profileProperties)
+                    .expectNext(profileProperties())
+                    .expectComplete()
+                    .verify();
     }
 
     @Test
     void writeToFileShouldWriteExpectedContent() throws IOException {
-        final var outputFilePath = Path.of("coucou");
         final var yamlMapper = new ObjectMapper(new YAMLFactory());
         final var captor = ArgumentCaptor.forClass(byte[].class);
-        Mockito.when(fileHelperMock.write(captor.capture(), ArgumentMatchers.same(outputFilePath))).thenReturn(Mono.empty());
+        Mockito.when(fileHelperMock.write(captor.capture(), ArgumentMatchers.same(FILE_PATH))).thenReturn(Mono.empty());
 
-        profilePropertiesParser.writeToFile(profileProperties(), outputFilePath).blockOptional();
+        final var writerMono = profilePropertiesParser.writeToFile(profileProperties(), FILE_PATH);
+
+        StepVerifier.create(writerMono)
+                    .expectComplete()
+                    .verify();
+
         final ProfileProperties writtenProfileProperties = yamlMapper.readValue(captor.getValue(), ProfileProperties.class);
-
         assertThat(writtenProfileProperties).isEqualTo(profileProperties());
-    }
-
-    @Test
-    void extractFromConstantsFilesShouldThrowExceptionWhenConfigurationFilesNotExisting() {
-        final var files = List.of(UNKNOWN_FILE_PATH);
-        final var exceptionThrown = new UncheckedIOException(new NoSuchFileException(UNKNOWN_FILE_PATH.toString()));
-        Mockito.when(fileHelperMock.lines(UNKNOWN_FILE_PATH)).thenReturn(Flux.error(exceptionThrown));
-
-        assertThatThrownBy(() -> profilePropertiesParser.extractFromConstantsFiles(files).block())
-                .isExactlyInstanceOf(UncheckedIOException.class)
-                .hasCauseExactlyInstanceOf(NoSuchFileException.class);
-    }
-
-    @Test
-    void extractFromConfigurationFilesShouldReturnExpectedProfile() {
-        final var files = List.of(FILE_PATH_1, FILE_PATH_2);
-        final var expectedProfile = ProfileProperties.builder()
-                                                     .enabled(Map.of(CONSTANT_1_NAME, CONSTANT_1_VALUE))
-                                                     .disabled(List.of("2"))
-                                                     .build();
-        Mockito.when(fileHelperMock.lines(FILE_PATH_1)).thenReturn(Flux.just("line1"));
-        Mockito.when(fileHelperMock.lines(FILE_PATH_2)).thenReturn(Flux.just("line2"));
-        Mockito.when(constantLineParserMock.parseLine("line1")).thenReturn(Mono.just(Constant.builder().enabled(true).name(CONSTANT_1_NAME).value(CONSTANT_1_VALUE).build()));
-        Mockito.when(constantLineParserMock.parseLine("line2")).thenReturn(Mono.just(Constant.builder().enabled(false).name("2").build()));
-
-        final var extractedProfile = profilePropertiesParser.extractFromConstantsFiles(files);
-
-        assertThat(extractedProfile.block()).isEqualTo(expectedProfile);
     }
 
     private Map<String, String> enabledConstants() {
@@ -122,8 +88,7 @@ class ProfilePropertiesParserTest {
                                 .build();
     }
 
-
-    private Path toPath(final String resourcePath) {
+    private Path resourceToPath(final String resourcePath) {
         return new File(Objects.requireNonNull(getClass().getClassLoader().getResource(resourcePath), resourcePath + " not found").getFile()).toPath();
     }
 }

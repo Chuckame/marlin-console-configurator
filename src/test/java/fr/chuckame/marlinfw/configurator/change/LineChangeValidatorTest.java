@@ -19,8 +19,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * All other cases are good: no violation
  */
 class LineChangeValidatorTest {
-    public static final String CONSTANT_NAME = "constant";
-    public static final String CONSTANT_VALUE = "value1";
+    private static final String CONSTANT_NAME = "constant";
+    private static final String CONSTANT_VALUE = "value1";
 
     private final LineChangeValidator lineChangeValidator = new LineChangeValidator();
 

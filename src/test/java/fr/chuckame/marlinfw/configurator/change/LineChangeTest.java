@@ -6,8 +6,7 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LineChangeTest {
-
-    public static final String CONSTANT_VALUE = "value";
+    private static final String CONSTANT_VALUE = "value";
 
     @Test
     void isValueChangedShouldReturnFalseWhenParsedConstantIsNull() {

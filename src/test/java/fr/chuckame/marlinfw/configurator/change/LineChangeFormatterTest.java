@@ -6,10 +6,10 @@ import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LineChangeFormatterTest {
-    public static final String CONSTANT_NAME = "constant";
-    public static final String CONSTANT_VALUE = "value";
-    public static final String LINE = "a line";
-    public static final int LINE_NUMBER = 15;
+    private static final String CONSTANT_NAME = "constant";
+    private static final String CONSTANT_VALUE = "value";
+    private static final String LINE = "a line";
+    private static final int LINE_NUMBER = 15;
     private final LineChangeFormatter formatter = new LineChangeFormatter();
 
     @Test
