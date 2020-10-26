@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MarlinConfigurator implements ApplicationRunner {
     public static void main(final String[] args) {
-        SpringApplication.run(MarlinConfigurator.class, "--apply", "--profile=src/test/resources/profile.yaml", "--file=src/test/resources/file.h");
+        SpringApplication.run(MarlinConfigurator.class, args);
     }
 
     private final ProfilePropertiesChangeAdapter changeAdapter;
