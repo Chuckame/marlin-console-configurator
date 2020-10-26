@@ -24,7 +24,7 @@ public class LineChangeManager {
 
     public Mono<LineChange> prepareChange(final String line, final int lineNumber, final Map<String, Constant> wantedConstants) {
         return constantLineInterpreter.parseLine(line)
-                                      .map(parsedConstant -> toLineChange(line, lineNumber, parsedConstant.getConstant(), wantedConstants
+                                      .map(parsedConstant -> toLineChange(line, lineNumber, parsedConstant, wantedConstants
                                               .get(parsedConstant.getConstant().getName())))
                                       .switchIfEmpty(Mono.fromSupplier(() -> new LineChange(line, lineNumber)));
     }
@@ -61,19 +61,20 @@ public class LineChangeManager {
                    .filter(Predicate.not(constantsFound::contains));
     }
 
-    private LineChange toLineChange(final String line, final int lineNumber, final Constant parsedConstant, @Nullable final Constant wantedConstant) {
-        final var violation = lineChangeValidator.getViolation(parsedConstant, wantedConstant);
+    private LineChange toLineChange(final String line, final int lineNumber, final ConstantLineInterpreter.ParsedConstant parsedConstant, @Nullable final Constant wantedConstant) {
+        final var violation = lineChangeValidator.getViolation(parsedConstant.getConstant(), wantedConstant);
         return LineChange.builder()
                          .line(line)
                          .lineNumber(lineNumber)
                          .constant(LineChange.LineChangeConstant.builder()
-                                                                .name(parsedConstant.getName())
-                                                                .comment(parsedConstant.getComment())
-                                                                .currentValue(parsedConstant.getValue())
+                                                                .name(parsedConstant.getConstant().getName())
+                                                                .comment(parsedConstant.getConstant().getComment())
+                                                                .currentValue(parsedConstant.getConstant().getValue())
                                                                 .wantedValue(Optional.ofNullable(wantedConstant).map(Constant::getValue).orElse(null))
                                                                 .build())
-                         .diff(violation != null ? LineChange.DiffEnum.ERROR : computeDiff(parsedConstant, wantedConstant))
+                         .diff(violation != null ? LineChange.DiffEnum.ERROR : computeDiff(parsedConstant.getConstant(), wantedConstant))
                          .violation(violation)
+                         .constantLineDetails(parsedConstant.getConstantLineDetails())
                          .build();
     }
 

@@ -26,9 +26,6 @@ class LineChangeManagerTest {
     private static final String CONSTANT_OTHER_VALUE = "other value";
     private static final int LINE_NUMBER = 15;
     private static final String INPUT_LINE = "input";
-    private static final ConstantLineDetails INPUT_LINE_DETAILS = ConstantLineDetails.builder()
-                                                                                     .line(INPUT_LINE)
-                                                                                     .build();
     private static final String OUTPUT_LINE = "output";
 
     @Mock
@@ -311,15 +308,20 @@ class LineChangeManagerTest {
                                                                 .currentValue(oldValue)
                                                                 .wantedValue(wantedValue)
                                                                 .build())
+                         .constantLineDetails(constantLineDetails())
                 ;
     }
 
     private ConstantLineInterpreter.ParsedConstant parsedConstant(final Constant constant) {
         return ConstantLineInterpreter.ParsedConstant.builder()
                                                      .constant(constant)
-                                                     .constantLineDetails(ConstantLineDetails.builder()
-                                                                                             .line(INPUT_LINE)
-                                                                                             .build())
+                                                     .constantLineDetails(constantLineDetails())
                                                      .build();
+    }
+
+    private static ConstantLineDetails constantLineDetails() {
+        return ConstantLineDetails.builder()
+                                  .line(INPUT_LINE)
+                                  .build();
     }
 }
