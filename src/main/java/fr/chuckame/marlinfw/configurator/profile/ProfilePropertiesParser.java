@@ -25,7 +25,7 @@ public class ProfilePropertiesParser {
     private final FileHelper fileHelper;
 
     public Mono<ProfileProperties> parseFromFile(final Path profileFilePath) {
-        return fileHelper.bytes(profileFilePath)
+        return fileHelper.read(profileFilePath)
                          .map(ExceptionUtils.wrap(bytes -> yamlParser.readValue(bytes, ProfileProperties.class)));
     }
 

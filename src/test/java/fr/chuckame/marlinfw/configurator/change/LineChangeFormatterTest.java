@@ -1,6 +1,5 @@
 package fr.chuckame.marlinfw.configurator.change;
 
-import fr.chuckame.marlinfw.configurator.constant.Constant;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,11 +22,7 @@ class LineChangeFormatterTest {
 
     @Test
     void formatShouldReturnDoNothingWhenWantedConstantIsNull() {
-        final var lineChange = lineChange()
-                .parsedConstant(Constant.builder().name(CONSTANT_NAME).build())
-                .wantedConstant(null)
-                .enabledDiff(LineChange.EnabledDiffEnum.DO_NOTHING)
-                .build();
+        final var lineChange = lineChange(LineChange.DiffEnum.DO_NOTHING, CONSTANT_VALUE, null);
 
         final var formatted = formatter.format(lineChange);
 
@@ -36,11 +31,7 @@ class LineChangeFormatterTest {
 
     @Test
     void formatShouldReturnDoNothingWhenEnabledAndValuesAreSame() {
-        final var lineChange = lineChange()
-                .parsedConstant(Constant.builder().name(CONSTANT_NAME).enabled(true).value(CONSTANT_VALUE).build())
-                .wantedConstant(Constant.builder().name(CONSTANT_NAME).enabled(true).value(CONSTANT_VALUE).build())
-                .enabledDiff(LineChange.EnabledDiffEnum.DO_NOTHING)
-                .build();
+        final var lineChange = lineChange(LineChange.DiffEnum.DO_NOTHING, CONSTANT_VALUE, CONSTANT_VALUE);
 
         final var formatted = formatter.format(lineChange);
 
@@ -49,11 +40,7 @@ class LineChangeFormatterTest {
 
     @Test
     void formatShouldReturnDoNothingWhenEnabledAndValuesAreNull() {
-        final var lineChange = lineChange()
-                .parsedConstant(Constant.builder().name(CONSTANT_NAME).enabled(true).build())
-                .wantedConstant(Constant.builder().name(CONSTANT_NAME).enabled(true).build())
-                .enabledDiff(LineChange.EnabledDiffEnum.DO_NOTHING)
-                .build();
+        final var lineChange = lineChange(LineChange.DiffEnum.DO_NOTHING, null, null);
 
         final var formatted = formatter.format(lineChange);
 
@@ -62,11 +49,7 @@ class LineChangeFormatterTest {
 
     @Test
     void formatShouldReturnEnableOnlyWhenParsedDisabledAndWantedEnabled() {
-        final var lineChange = lineChange()
-                .parsedConstant(Constant.builder().name(CONSTANT_NAME).enabled(false).value(CONSTANT_VALUE).build())
-                .wantedConstant(Constant.builder().name(CONSTANT_NAME).enabled(true).value(CONSTANT_VALUE).build())
-                .enabledDiff(LineChange.EnabledDiffEnum.TO_ENABLE)
-                .build();
+        final var lineChange = lineChange(LineChange.DiffEnum.TO_ENABLE, CONSTANT_VALUE, CONSTANT_VALUE);
 
         final var formatted = formatter.format(lineChange);
 
@@ -75,11 +58,7 @@ class LineChangeFormatterTest {
 
     @Test
     void formatShouldReturnDisableOnlyWhenParsedEnabledAndWantedDisabled() {
-        final var lineChange = lineChange()
-                .parsedConstant(Constant.builder().name(CONSTANT_NAME).enabled(true).value(CONSTANT_VALUE).build())
-                .wantedConstant(Constant.builder().name(CONSTANT_NAME).enabled(false).value(CONSTANT_VALUE).build())
-                .enabledDiff(LineChange.EnabledDiffEnum.TO_DISABLE)
-                .build();
+        final var lineChange = lineChange(LineChange.DiffEnum.TO_DISABLE, CONSTANT_VALUE, CONSTANT_VALUE);
 
         final var formatted = formatter.format(lineChange);
 
@@ -88,11 +67,7 @@ class LineChangeFormatterTest {
 
     @Test
     void formatShouldReturnEnableAndChangeWhenParsedDisabledAndWantedEnabledWithOtherValue() {
-        final var lineChange = lineChange()
-                .parsedConstant(Constant.builder().name(CONSTANT_NAME).enabled(false).value(CONSTANT_VALUE).build())
-                .wantedConstant(Constant.builder().name(CONSTANT_NAME).enabled(true).value("new value").build())
-                .enabledDiff(LineChange.EnabledDiffEnum.TO_ENABLE)
-                .build();
+        final var lineChange = lineChange(LineChange.DiffEnum.TO_ENABLE_AND_CHANGE_VALUE, CONSTANT_VALUE, "new value");
 
         final var formatted = formatter.format(lineChange);
 
@@ -100,19 +75,42 @@ class LineChangeFormatterTest {
     }
 
     @Test
-    void formatShouldReturnChangeOnlyWhenEnabledAndWantedWithOtherValue() {
-        final var lineChange = lineChange()
-                .parsedConstant(Constant.builder().name(CONSTANT_NAME).enabled(true).value(CONSTANT_VALUE).build())
-                .wantedConstant(Constant.builder().name(CONSTANT_NAME).enabled(true).value("new value").build())
-                .enabledDiff(LineChange.EnabledDiffEnum.DO_NOTHING)
-                .build();
+    void formatShouldReturnExpectedTextWhenChangeValue() {
+        final var lineChange = lineChange(LineChange.DiffEnum.CHANGE_VALUE, CONSTANT_VALUE, "new value");
 
         final var formatted = formatter.format(lineChange);
 
         assertThat(formatted).isEqualTo(CONSTANT_NAME + ": C value → new value");
     }
 
-    private LineChange.LineChangeBuilder lineChange() {
-        return LineChange.builder().line(LINE).lineNumber(LINE_NUMBER);
+    @Test
+    void formatShouldReturnExpectedTextWhenError() {
+        final var lineChange = LineChange.builder()
+                                         .line(LINE)
+                                         .lineNumber(LINE_NUMBER)
+                                         .diff(LineChange.DiffEnum.ERROR)
+                                         .violation("a violation")
+                                         .constant(LineChange.LineChangeConstant.builder()
+                                                                                .name(CONSTANT_NAME)
+                                                                                .currentValue(CONSTANT_VALUE)
+                                                                                .build())
+                                         .build();
+
+        final var formatted = formatter.format(lineChange);
+
+        assertThat(formatted).isEqualTo(CONSTANT_NAME + ": ERROR a violation");
+    }
+
+    private LineChange lineChange(final LineChange.DiffEnum diff, final String oldValue, final String wantedValue) {
+        return LineChange.builder()
+                         .line(LINE)
+                         .lineNumber(LINE_NUMBER)
+                         .diff(diff)
+                         .constant(LineChange.LineChangeConstant.builder()
+                                                                .name(CONSTANT_NAME)
+                                                                .currentValue(oldValue)
+                                                                .wantedValue(wantedValue)
+                                                                .build())
+                         .build();
     }
 }

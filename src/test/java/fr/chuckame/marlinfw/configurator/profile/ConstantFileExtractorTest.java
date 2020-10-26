@@ -1,7 +1,7 @@
 package fr.chuckame.marlinfw.configurator.profile;
 
 import fr.chuckame.marlinfw.configurator.constant.Constant;
-import fr.chuckame.marlinfw.configurator.constant.ConstantLineParser;
+import fr.chuckame.marlinfw.configurator.constant.ConstantLineInterpreter;
 import fr.chuckame.marlinfw.configurator.util.FileHelper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,7 +31,7 @@ class ConstantFileExtractorTest {
     private static final String LINE_2 = "line2";
 
     @Mock
-    private ConstantLineParser constantLineParserMock;
+    private ConstantLineInterpreter constantLineInterpreterMock;
     @Mock
     private FileHelper fileHelperMock;
     @InjectMocks
@@ -54,8 +54,11 @@ class ConstantFileExtractorTest {
                                                      .disabled(List.of(DISABLED_CONSTANT_NAME))
                                                      .build();
         Mockito.when(fileHelperMock.lines(FILE_PATH)).thenReturn(Flux.just(LINE_1, LINE_2));
-        Mockito.when(constantLineParserMock.parseLine(LINE_1)).thenReturn(Mono.just(Constant.builder().enabled(true).name(CONSTANT_NAME).value(CONSTANT_VALUE).build()));
-        Mockito.when(constantLineParserMock.parseLine(LINE_2)).thenReturn(Mono.just(Constant.builder().enabled(false).name(DISABLED_CONSTANT_NAME).build()));
+        Mockito.when(constantLineInterpreterMock.parseLine(LINE_1))
+               .thenReturn(Mono.just(ConstantLineInterpreter.ParsedConstant.builder().constant(Constant.builder().enabled(true).name(CONSTANT_NAME).value(CONSTANT_VALUE).build())
+                                                                           .build()));
+        Mockito.when(constantLineInterpreterMock.parseLine(LINE_2))
+               .thenReturn(Mono.just(ConstantLineInterpreter.ParsedConstant.builder().constant(Constant.builder().enabled(false).name(DISABLED_CONSTANT_NAME).build()).build()));
 
         final var extractedProfile = constantFileExtractor.extractFromConstantsFile(FILE_PATH);
 

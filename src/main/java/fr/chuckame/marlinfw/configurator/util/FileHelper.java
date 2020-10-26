@@ -12,7 +12,7 @@ public class FileHelper {
         return Flux.fromStream(ExceptionUtils.wrap(() -> Files.lines(file)));
     }
 
-    public Mono<byte[]> bytes(final Path file) {
+    public Mono<byte[]> read(final Path file) {
         return Mono.fromCallable(() -> Files.readAllBytes(file));
     }
 

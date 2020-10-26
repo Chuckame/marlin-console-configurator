@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -29,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(MockitoExtension.class)
 class ProfilePropertiesParserTest {
     private final Path FILE_PATH = resourceToPath("profile.yaml");
+
     @Mock
     private FileHelper fileHelperMock;
     @InjectMocks
@@ -36,12 +38,27 @@ class ProfilePropertiesParserTest {
 
     @Test
     void parseFromFileShouldReturnExpectedProfile() throws IOException {
-        Mockito.when(fileHelperMock.bytes(FILE_PATH)).thenReturn(Mono.just(Files.readAllBytes(FILE_PATH)));
+        Mockito.when(fileHelperMock.read(FILE_PATH)).thenReturn(Mono.just(Files.readAllBytes(FILE_PATH)));
 
         final var profileProperties = profilePropertiesParser.parseFromFile(FILE_PATH);
 
         StepVerifier.create(profileProperties)
                     .expectNext(profileProperties())
+                    .expectComplete()
+                    .verify();
+    }
+
+    @Test
+    void parseFromFileShouldReturnNotReturnNullValues() throws IOException {
+        Mockito.when(fileHelperMock.read(FILE_PATH)).thenReturn(Mono.just("enabled:\n".getBytes()));
+
+        final var profileProperties = profilePropertiesParser.parseFromFile(FILE_PATH);
+
+        StepVerifier.create(profileProperties)
+                    .expectNext(ProfileProperties.builder()
+                                                 .enabled(Map.of())
+                                                 .disabled(List.of())
+                                                 .build())
                     .expectComplete()
                     .verify();
     }

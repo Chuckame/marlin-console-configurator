@@ -1,7 +1,7 @@
 package fr.chuckame.marlinfw.configurator.profile;
 
 import fr.chuckame.marlinfw.configurator.constant.Constant;
-import fr.chuckame.marlinfw.configurator.constant.ConstantLineParser;
+import fr.chuckame.marlinfw.configurator.constant.ConstantLineInterpreter;
 import fr.chuckame.marlinfw.configurator.util.FileHelper;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -12,12 +12,13 @@ import java.util.LinkedHashMap;
 
 @RequiredArgsConstructor
 public class ConstantFileExtractor {
-    private final ConstantLineParser constantLineParser;
+    private final ConstantLineInterpreter constantLineInterpreter;
     private final FileHelper fileHelper;
 
     public Mono<ProfileProperties> extractFromConstantsFile(final Path filePath) {
         return fileHelper.lines(filePath)
-                         .flatMap(constantLineParser::parseLine)
+                         .flatMap(constantLineInterpreter::parseLine)
+                         .map(ConstantLineInterpreter.ParsedConstant::getConstant)
                          .reduceWith(this::initEmptyProfile, this::addConstantToProfile);
     }
 

@@ -1,59 +1,57 @@
 package fr.chuckame.marlinfw.configurator.change;
 
-import fr.chuckame.marlinfw.configurator.constant.Constant;
+import fr.chuckame.marlinfw.configurator.constant.ConstantLineDetails;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NonNull;
 import lombok.Setter;
 import org.springframework.lang.Nullable;
 
-import java.util.Objects;
-
 @Data
-@Setter(AccessLevel.PRIVATE)
+@Builder(access = AccessLevel.PACKAGE)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class LineChange {
     private final String line;
     private final int lineNumber;
+    private final DiffEnum diff;
     @Nullable
-    private Constant parsedConstant;
+    private final LineChangeConstant constant;
     @Nullable
-    private Constant wantedConstant;
-    private EnabledDiffEnum enabledDiff;
+    private final ConstantLineDetails constantLineDetails;
+    @Nullable
+    @Setter(AccessLevel.PACKAGE)
+    private String violation;
 
-    LineChange(@NonNull final String line, final int lineNumber) {
+    LineChange(final String line, final int lineNumber) {
         this.line = line;
         this.lineNumber = lineNumber;
-        enabledDiff = EnabledDiffEnum.DO_NOTHING;
+        diff = DiffEnum.DO_NOTHING;
+        constant = null;
+        constantLineDetails = null;
+        violation = null;
     }
 
-    @Builder(access = AccessLevel.PACKAGE)
-    private LineChange(@NonNull final String line, @NonNull final Integer lineNumber, @Nullable final Constant parsedConstant, @Nullable final Constant wantedConstant,
-                       @NonNull final EnabledDiffEnum enabledDiff) {
-        this.line = line;
-        this.lineNumber = lineNumber;
-        this.parsedConstant = parsedConstant;
-        this.wantedConstant = wantedConstant;
-        this.enabledDiff = enabledDiff;
+    @Data
+    @Builder
+    public static class LineChangeConstant {
+        private final String name;
+        private final String comment;
+        private final String currentValue;
+        @Nullable
+        private String wantedValue;
     }
 
-    public enum EnabledDiffEnum {
+    public enum DiffEnum {
         DO_NOTHING,
         TO_ENABLE,
-        TO_DISABLE
+        TO_ENABLE_AND_CHANGE_VALUE,
+        CHANGE_VALUE,
+        TO_DISABLE,
+        ERROR
     }
 
     public boolean isConstant() {
-        return parsedConstant != null;
-    }
-
-    public boolean hasWantedConstant() {
-        return wantedConstant != null;
-    }
-
-    public boolean isValueChanged() {
-        return isConstant() && hasWantedConstant() && !Objects.equals(parsedConstant.getValue(), wantedConstant.getValue());
+        return constant != null;
     }
 }

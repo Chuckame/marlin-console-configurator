@@ -1,6 +1,6 @@
 # marlin-console-configurator
 
-[Example profile.yaml](src/test/resources/example/profile.yaml)
+[Example profile.yaml](example/profile.yaml)
 Notes:
 - we don't care about the order
 - we don't care about the constant location (in which file we enable/disable a constant), because if there is missing constant from output files, the script will exit without doing any modification
