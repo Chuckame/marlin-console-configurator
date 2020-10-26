@@ -7,6 +7,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
 import fr.chuckame.marlinfw.configurator.util.ExceptionUtils;
 import fr.chuckame.marlinfw.configurator.util.FileHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.yaml.snakeyaml.DumperOptions;
 import reactor.core.publisher.Mono;
 
@@ -19,6 +20,7 @@ import static com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature.MINIMI
 import static com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature.SPLIT_LINES;
 import static com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature.WRITE_DOC_START_MARKER;
 
+@Component
 @RequiredArgsConstructor
 public class ProfilePropertiesParser {
     private final ObjectMapper yamlParser = prepareYamlMapper();

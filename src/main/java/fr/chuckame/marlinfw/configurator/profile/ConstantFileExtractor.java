@@ -4,12 +4,14 @@ import fr.chuckame.marlinfw.configurator.constant.Constant;
 import fr.chuckame.marlinfw.configurator.constant.ConstantLineInterpreter;
 import fr.chuckame.marlinfw.configurator.util.FileHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
+@Component
 @RequiredArgsConstructor
 public class ConstantFileExtractor {
     private final ConstantLineInterpreter constantLineInterpreter;

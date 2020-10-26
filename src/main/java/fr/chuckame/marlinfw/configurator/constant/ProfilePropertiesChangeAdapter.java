@@ -1,10 +1,12 @@
 package fr.chuckame.marlinfw.configurator.constant;
 
 import fr.chuckame.marlinfw.configurator.profile.ProfileProperties;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class ProfilePropertiesChangeAdapter {
     public Map<String, Constant> getWantedConstants(final ProfileProperties profileProperties) {
         final var wantedChanges = new HashMap<String, Constant>();

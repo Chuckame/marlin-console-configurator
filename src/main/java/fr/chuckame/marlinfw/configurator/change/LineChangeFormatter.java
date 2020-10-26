@@ -1,8 +1,10 @@
 package fr.chuckame.marlinfw.configurator.change;
 
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+@Component
 public class LineChangeFormatter {
     private static final char DISABLE = 'D';
     private static final char ENABLE = 'E';

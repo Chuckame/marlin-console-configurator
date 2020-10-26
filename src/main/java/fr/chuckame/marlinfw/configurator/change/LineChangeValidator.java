@@ -1,7 +1,9 @@
 package fr.chuckame.marlinfw.configurator.change;
 
 import fr.chuckame.marlinfw.configurator.constant.Constant;
+import org.springframework.stereotype.Component;
 
+@Component
 public class LineChangeValidator {
     private static final String MISSING_WANTED_VALUE_MESSAGE = "Wanted value should be defined";
     private static final String MISSING_PARSED_VALUE_MESSAGE = "Wanted value should not be defined";

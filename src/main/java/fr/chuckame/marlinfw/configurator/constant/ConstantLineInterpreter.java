@@ -3,12 +3,14 @@ package fr.chuckame.marlinfw.configurator.constant;
 import lombok.Builder;
 import lombok.Data;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Component
 public class ConstantLineInterpreter {
     private static final Pattern CONSTANT_REGEX = Pattern.compile("^(?:\\h*(//))?\\h*#define\\h+(\\w+)(?:\\h+([^/\\h]+(?:\\h+[^/\\h]+)*))?\\h*(?://\\h*(.*))?$");
 
