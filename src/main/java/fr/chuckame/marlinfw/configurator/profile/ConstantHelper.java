@@ -1,27 +1,19 @@
 package fr.chuckame.marlinfw.configurator.profile;
 
 import fr.chuckame.marlinfw.configurator.constant.Constant;
-import fr.chuckame.marlinfw.configurator.constant.ConstantLineInterpreter;
-import fr.chuckame.marlinfw.configurator.util.FileHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
 @Component
 @RequiredArgsConstructor
-public class ConstantFileExtractor {
-    private final ConstantLineInterpreter constantLineInterpreter;
-    private final FileHelper fileHelper;
-
-    public Mono<ProfileProperties> extractFromConstantsFile(final Path filePath) {
-        return fileHelper.lines(filePath)
-                         .flatMap(constantLineInterpreter::parseLine)
-                         .map(ConstantLineInterpreter.ParsedConstant::getConstant)
-                         .reduceWith(this::initEmptyProfile, this::addConstantToProfile);
+public class ConstantHelper {
+    public Mono<ProfileProperties> constantsToProfile(final Flux<Constant> constants) {
+        return constants.reduceWith(this::initEmptyProfile, this::addConstantToProfile);
     }
 
     private ProfileProperties initEmptyProfile() {
