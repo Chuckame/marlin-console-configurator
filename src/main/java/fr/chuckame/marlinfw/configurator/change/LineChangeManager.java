@@ -61,6 +61,22 @@ public class LineChangeManager {
                    .filter(Predicate.not(constantsFound::contains));
     }
 
+    public LineChange toLineChange(final String line, final int lineNumber, final Constant parsedConstant, @Nullable final Constant wantedConstant) {
+        final var violation = lineChangeValidator.getViolation(parsedConstant, wantedConstant);
+        return LineChange.builder()
+                         .line(line)
+                         .lineNumber(lineNumber)
+                         .constant(LineChange.LineChangeConstant.builder()
+                                                                .name(parsedConstant.getName())
+                                                                .comment(parsedConstant.getComment())
+                                                                .currentValue(parsedConstant.getValue())
+                                                                .wantedValue(Optional.ofNullable(wantedConstant).map(Constant::getValue).orElse(null))
+                                                                .build())
+                         .diff(violation != null ? LineChange.DiffEnum.ERROR : computeDiff(parsedConstant, wantedConstant))
+                         .violation(violation)
+                         .build();
+    }
+
     private LineChange toLineChange(final String line, final int lineNumber, final ConstantLineInterpreter.ParsedConstant parsedConstant, @Nullable final Constant wantedConstant) {
         final var violation = lineChangeValidator.getViolation(parsedConstant.getConstant(), wantedConstant);
         return LineChange.builder()

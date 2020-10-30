@@ -2,6 +2,7 @@ package fr.chuckame.marlinfw.configurator.command;
 
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.Parameters;
+import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import fr.chuckame.marlinfw.configurator.change.LineChange;
 import fr.chuckame.marlinfw.configurator.change.LineChangeFormatter;
@@ -26,9 +27,9 @@ import java.util.stream.Collectors;
 @Parameters(commandNames = "diff", commandDescription = "Display differences between marlin configuration files")
 @RequiredArgsConstructor
 public class DiffCommand implements Command {
-    @Parameter(names = {"--left"}, required = true, description = "marlin configuration files paths for the base of diff")
+    @Parameter(names = {"--left"}, variableArity = true, required = true, description = "marlin configuration files paths for the base of diff")
     private List<Path> leftFiles;
-    @Parameter(names = {"--right"}, required = true, description = "marlin configuration files paths to know what was changed since --source paths")
+    @Parameter(names = {"--right"}, variableArity = true, required = true, description = "marlin configuration files paths to know what was changed since --source paths")
     private List<Path> rightFiles;
 
     private final LineChangeManager lineChangeManager;
@@ -42,8 +43,30 @@ public class DiffCommand implements Command {
         return getConstants(leftFiles)
                 .zipWith(getConstants(rightFiles))
                 .map(t -> Maps.difference(t.getT1(), t.getT2()))
-                .doOnNext(diff -> consoleHelper.writeLine(diff.entriesDiffering().toString()))
+                .flatMap(this::printDiff)
                 .then();
+    }
+
+    private Mono<Void> printDiff(final MapDifference<String, Constant> diff) {
+        final var removed = Flux.fromIterable(diff.entriesOnlyOnLeft().keySet())
+                                .map(removedConstant -> removedConstant + ": Removed")
+                                .doOnNext(msg -> consoleHelper.writeLine(msg, ConsoleHelper.ColorEnum.RED))
+                                .then();
+        final var added = Flux.fromIterable(diff.entriesOnlyOnRight().values())
+                              .map(addedConstant -> {
+                                  if (addedConstant.isEnabled() && addedConstant.getValue() != null) {
+                                      return addedConstant.getName() + ": Added with value: '" + addedConstant.getValue() + "'";
+                                  }
+                                  return addedConstant.getName() + ": Added";
+                              })
+                              .doOnNext(msg -> consoleHelper.writeLine(msg, ConsoleHelper.ColorEnum.GREEN))
+                              .then();
+        final var modified = Flux.fromIterable(diff.entriesDiffering().values())
+                                 .map(modifiedConstant -> lineChangeManager.toLineChange("", 1, modifiedConstant.leftValue(), modifiedConstant.rightValue()))
+                                 .map(lineChangeFormatter::format)
+                                 .doOnNext(msg -> consoleHelper.writeLine(msg, ConsoleHelper.ColorEnum.CYAN))
+                                 .then();
+        return Flux.concat(added, removed, Mono.fromRunnable(() -> consoleHelper.writeLine("Modified:", ConsoleHelper.ColorEnum.CYAN)), modified).then();
     }
 
     private Mono<Map<String, Constant>> getConstants(final List<Path> files) {
