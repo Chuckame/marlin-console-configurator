@@ -16,6 +16,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     compile 'io.projectreactor:reactor-core'
+    implementation 'com.beust:jcommander:1.78'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

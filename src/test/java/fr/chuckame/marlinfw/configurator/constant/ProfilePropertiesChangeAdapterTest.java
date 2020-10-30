@@ -19,7 +19,7 @@ class ProfilePropertiesChangeAdapterTest {
                                              .disabled(List.of())
                                              .build();
 
-        final var wantedConstants = changeAdapter.getWantedConstants(profile);
+        final var wantedConstants = changeAdapter.profileToConstants(profile);
 
         assertThat(wantedConstants).isEmpty();
     }
@@ -31,7 +31,7 @@ class ProfilePropertiesChangeAdapterTest {
                                              .disabled(List.of("c3", "c4"))
                                              .build();
 
-        final var wantedConstants = changeAdapter.getWantedConstants(profile);
+        final var wantedConstants = changeAdapter.profileToConstants(profile);
 
         assertThat(wantedConstants)
                 .containsEntry("c1", Constant.builder().enabled(true).name("c1").value(null).build())

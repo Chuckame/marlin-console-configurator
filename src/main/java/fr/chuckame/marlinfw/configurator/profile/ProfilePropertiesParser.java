@@ -37,6 +37,10 @@ public class ProfilePropertiesParser {
                    .then();
     }
 
+    public Mono<String> writeToString(final ProfileProperties profile) {
+        return Mono.fromCallable(() -> yamlParser.writeValueAsString(profile));
+    }
+
     private ObjectMapper prepareYamlMapper() {
         return new ObjectMapper(newYamlFactoryWithCustomIndentationForArrays(2)
                                         .enable(MINIMIZE_QUOTES)
