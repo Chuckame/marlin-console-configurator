@@ -17,6 +17,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     compile 'io.projectreactor:reactor-core'
     implementation 'com.beust:jcommander:1.78'
+    implementation 'com.google.guava:guava:30.0-jre'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
