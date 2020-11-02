@@ -32,7 +32,7 @@ dependencies {
 
 application {
     mainClass = 'fr.chuckame.marlinfw.configurator.MarlinConfigurator'
-    applicationDefaultJvmArgs = ['-Dapp-console-name=marlin-console-configurator.jar']
+    applicationDefaultJvmArgs = ['-Dapp-console-name=marlin-console-configurator']
 }
 
 test {

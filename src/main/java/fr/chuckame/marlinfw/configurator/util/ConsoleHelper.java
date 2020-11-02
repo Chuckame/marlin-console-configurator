@@ -35,7 +35,7 @@ public class ConsoleHelper {
     public void writeLine(final Consumer<StringBuilder> lineBuilder) {
         final var line = new StringBuilder();
         lineBuilder.accept(line);
-        writeLine(lineBuilder.toString());
+        writeLine(line.toString());
     }
 
     public void writeErrorLine(final String line) {
