@@ -38,3 +38,5 @@ application {
 test {
     useJUnitPlatform()
 }
+
+bootDistZip.setArchiveFileName('marlin-console-configurator.zip')
