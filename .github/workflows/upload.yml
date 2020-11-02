@@ -21,9 +21,9 @@ jobs:
       - name: Grant permissions for gradle
         run: chmod +x gradlew
       - name: Build and test
-        run: ./gradlew test --console=plain
+        run: ./gradlew test
       - name: Prepare packages
-        run: ./gradlew installBootDist --console=plain
+        run: ./gradlew bootDistZip
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.1.4
