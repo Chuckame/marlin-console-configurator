@@ -6,26 +6,26 @@ name: Release
 on:
   push:
     tags:
-    - 'v*'
+      - 'v*'
 
 jobs:
   upload:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-    - name: Set up JDK
-      uses: actions/setup-java@v1
-      with:
-        java-version: 11
-    - name: Grant permissions for gradle
-      run: chmod +x gradlew
-    - name: Build and test
-      run: ./gradlew test
-    - name: Prepare GitHub packages
-      run: ./gradlew installBootDist
-    - name: Upload GitHub packages
-      uses: actions/upload-artifact@v2.2.0
-      with:
-        path: build/install/marlin-console-configurator
-        if-no-files-found: error
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Grant permissions for gradle
+        run: chmod +x gradlew
+      - name: Build and test
+        run: ./gradlew test --console=plain
+      - name: Prepare GitHub packages
+        run: ./gradlew installBootDist --console=plain
+      - name: Upload GitHub packages
+        uses: actions/upload-artifact@v2.2.0
+        with:
+          path: build/install/marlin-console-configurator-boot
+          if-no-files-found: error
