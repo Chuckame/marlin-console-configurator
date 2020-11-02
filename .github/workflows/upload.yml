@@ -24,13 +24,6 @@ jobs:
         run: ./gradlew test --console=plain
       - name: Prepare packages
         run: ./gradlew installBootDist --console=plain
-
-      - name: Upload GitHub packages
-        uses: actions/upload-artifact@v2.2.0
-        with:
-          path: build/install/marlin-console-configurator-boot
-          if-no-files-found: error
-
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1.1.4
