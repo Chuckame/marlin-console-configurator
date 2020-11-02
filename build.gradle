@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'org.springframework.boot' version '2.3.4.RELEASE'
+    id 'application'
 }
 
 group 'fr.chuckame.marlinfw'
@@ -27,6 +28,11 @@ dependencies {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     }
     testCompile 'io.projectreactor:reactor-test'
+}
+
+application {
+    mainClass = 'fr.chuckame.marlinfw.configurator.MarlinConfigurator'
+    applicationDefaultJvmArgs = ['-Dapp-console-name=marlin-console-configurator.jar']
 }
 
 test {

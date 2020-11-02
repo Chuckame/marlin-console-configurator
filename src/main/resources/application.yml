@@ -1,6 +1,6 @@
 spring.main.web-application-type: none
 spring.main.banner-mode: off
-command-usage: ./gradlew bootRun
+app-console-name: ./gradlew bootRun
 spring:
   main:
     log-startup-info: false

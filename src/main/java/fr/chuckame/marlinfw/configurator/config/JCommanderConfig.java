@@ -11,7 +11,7 @@ import java.util.List;
 
 @Configuration
 public class JCommanderConfig {
-    @Value("${command-usage}")
+    @Value("${app-console-name}")
     private String commandUsage;
 
     @Bean
