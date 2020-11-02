@@ -1,5 +1,7 @@
 # marlin-console-configurator
 
+![Release](https://github.com/Chuckame/marlin-console-configurator/workflows/Release/badge.svg)
+
 [Example profile.yaml](example/profile.yaml)
 Notes:
 - we don't care about the order
