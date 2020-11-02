@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'fr.chuckame.marlinfw'
-version '1.0.0'
+version '1.1.0'
 sourceCompatibility = '11'
 
 repositories {

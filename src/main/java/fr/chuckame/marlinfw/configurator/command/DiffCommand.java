@@ -70,11 +70,11 @@ public class DiffCommand implements Command {
     }
 
     private Mono<Map<String, Constant>> getConstants(final List<Path> files) {
-        return Flux.fromIterable(files)
-                   .flatMap(fileHelper::lines)
-                   .flatMap(constantLineInterpreter::parseLine)
-                   .map(ConstantLineInterpreter.ParsedConstant::getConstant)
-                   .collectMap(Constant::getName);
+        return fileHelper.listFiles(files)
+                         .flatMap(fileHelper::lines)
+                         .flatMap(constantLineInterpreter::parseLine)
+                         .map(ConstantLineInterpreter.ParsedConstant::getConstant)
+                         .collectMap(Constant::getName);
     }
 
     private Mono<Void> printChanges(final Map<Path, List<LineChange>> changes) {

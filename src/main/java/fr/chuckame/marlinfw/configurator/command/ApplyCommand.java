@@ -88,13 +88,13 @@ public class ApplyCommand implements Command {
     }
 
     public Mono<Map<Path, List<LineChange>>> prepareChanges(final List<Path> filesPath, final Map<String, Constant> wantedConstants) {
-        return Flux.fromIterable(filesPath)
-                   .flatMap(filePath -> fileHelper.lines(filePath)
-                                                  .index()
-                                                  .concatMap(line -> lineChangeManager.prepareChange(line.getT2(), line.getT1().intValue(), wantedConstants))
-                                                  .collectList()
-                                                  .zipWith(Mono.just(filePath)))
-                   .collectMap(Tuple2::getT2, Tuple2::getT1);
+        return fileHelper.listFiles(filesPath)
+                         .flatMap(filePath -> fileHelper.lines(filePath)
+                                                        .index()
+                                                        .concatMap(line -> lineChangeManager.prepareChange(line.getT2(), line.getT1().intValue(), wantedConstants))
+                                                        .collectList()
+                                                        .zipWith(Mono.just(filePath)))
+                         .collectMap(Tuple2::getT2, Tuple2::getT1);
     }
 
     public Mono<Void> applyAndSaveChanges(final Map<Path, List<LineChange>> changes) {

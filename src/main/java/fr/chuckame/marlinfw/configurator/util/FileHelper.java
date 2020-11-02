@@ -12,9 +12,29 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.Spliterator;
+import java.util.function.Supplier;
+import java.util.stream.StreamSupport;
 
 @Component
 public class FileHelper {
+    public Flux<Path> listFiles(final List<Path> paths) {
+        return Flux.fromIterable(paths)
+                   .flatMap(path -> {
+                       if (Files.isDirectory(path)) {
+                           return toFlux(ExceptionUtils.wrap(() -> Files.newDirectoryStream(path).spliterator()));
+                       }
+                       return Mono.just(path);
+                   })
+                   .filter(Files::isRegularFile)
+                ;
+    }
+
+    private <T> Flux<T> toFlux(final Supplier<Spliterator<T>> iterator) {
+        return Flux.fromStream(() -> StreamSupport.stream(iterator.get(), false));
+
+    }
+
     public Flux<String> lines(final Path file) {
         return Flux.fromStream(ExceptionUtils.wrap(() -> Files.lines(file)));
     }

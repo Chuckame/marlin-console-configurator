@@ -9,7 +9,6 @@ import fr.chuckame.marlinfw.configurator.util.ConsoleHelper;
 import fr.chuckame.marlinfw.configurator.util.FileHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.nio.file.Path;
@@ -34,10 +33,10 @@ public class GenerateProfileCommand implements Command {
 
     @Override
     public Mono<Void> run() {
-        return constantHelper.constantsToProfile(Flux.fromIterable(filesPath)
-                                                     .flatMap(fileHelper::lines)
-                                                     .flatMap(constantLineInterpreter::parseLine)
-                                                     .map(ConstantLineInterpreter.ParsedConstant::getConstant))
+        return constantHelper.constantsToProfile(fileHelper.listFiles(filesPath)
+                                                           .flatMap(fileHelper::lines)
+                                                           .flatMap(constantLineInterpreter::parseLine)
+                                                           .map(ConstantLineInterpreter.ParsedConstant::getConstant))
                              .flatMap(profile -> profilePath.equals(CONSOLE_OUTPUT) ?
                                      profilePropertiesParser.writeToString(profile).doOnNext(consoleHelper::writeLine).then()
                                      : profilePropertiesParser.writeToFile(profile, profilePath));
