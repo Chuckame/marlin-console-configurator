@@ -71,12 +71,15 @@ public class ApplyCommand implements Command {
     private Mono<Void> printChanges(final Map<Path, List<LineChange>> changes) {
         return Flux.fromIterable(changes.entrySet())
                    .concatMap(fileChanges -> Flux.concat(
-                           Flux.just(String.format("%s change(s) to apply for file %s:", fileChanges.getValue().stream().filter(this::isModifyingChange).count(), fileChanges
-                                   .getKey())),
-                           Flux.fromIterable(fileChanges.getValue()).filter(LineChange::isConstant).map(lineChangeFormatter::format),
-                           Flux.just("")
+                           Mono.fromRunnable(() -> consoleHelper
+                                   .writeLine(String.format("%s change(s) to apply for file %s:", fileChanges.getValue().stream().filter(this::isModifyingChange)
+                                                                                                             .count(), fileChanges
+                                                                    .getKey()))),
+                           Flux.fromIterable(fileChanges.getValue()).filter(LineChange::isConstant).doOnNext(change -> consoleHelper
+                                   .writeLine(lineChangeFormatter.format(change), change
+                                           .getDiff() == LineChange.DiffEnum.DO_NOTHING ? ConsoleHelper.ColorEnum.DEFAULT : ConsoleHelper.ColorEnum.YELLOW)),
+                           Mono.fromRunnable(() -> consoleHelper.writeLine(""))
                    ))
-                   .doOnNext(consoleHelper::writeLine)
                    .then()
                 ;
     }

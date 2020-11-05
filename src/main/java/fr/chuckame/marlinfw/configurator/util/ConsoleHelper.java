@@ -13,6 +13,7 @@ public class ConsoleHelper {
     @RequiredArgsConstructor
     public enum ColorEnum {
         //  BLACK("\u001B[30m"), useless since it is the default background color
+        DEFAULT(null),
         RED("\u001B[31m"),
         GREEN("\u001B[32m"),
         YELLOW("\u001B[33m"),
@@ -25,7 +26,11 @@ public class ConsoleHelper {
     }
 
     public void writeLine(final String line, final ColorEnum color) {
-        writeLine(String.join("", color.colorCode, line, RESET_COLOR));
+        if (color == ColorEnum.DEFAULT) {
+            writeLine(line);
+        } else {
+            writeLine(String.join("", color.colorCode, line, RESET_COLOR));
+        }
     }
 
     public void writeLine(final String line) {
