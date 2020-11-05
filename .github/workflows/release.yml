@@ -54,6 +54,9 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
@@ -63,4 +66,4 @@ jobs:
           push: true
           tags: |
             chuckame/marlin-console-configurator:latest
-            chuckame/marlin-console-configurator:${{ github.ref }}
+            chuckame/marlin-console-configurator:${{ steps.get_version.outputs.VERSION }}
