@@ -18,7 +18,7 @@ import java.util.List;
 @Parameters(commandNames = "generate-profile", commandDescription = "Generate a profile from given marlin constants files")
 @RequiredArgsConstructor
 public class GenerateProfileCommand implements Command {
-    @Parameter(required = true, description = "/path1 /path2 ...\tThe marlin constants files paths")
+    @Parameter(required = true, description = "/path1 /path2 ...\tThe marlin constants folder or files paths")
     private List<Path> filesPath;
     @Parameter(names = {"--output", "-o"}, required = true, description = "The output profile path, will be overwritten if already existing file. If 'console' is specified, the profile will just be printed to the console")
     private Path profilePath;

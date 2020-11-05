@@ -53,7 +53,7 @@ class LineChangeFormatterTest {
 
         final var formatted = formatter.format(lineChange);
 
-        assertThat(formatted).isEqualTo(CONSTANT_NAME + ": E");
+        assertThat(formatted).isEqualTo("Enable          constant");
     }
 
     @Test
@@ -62,7 +62,7 @@ class LineChangeFormatterTest {
 
         final var formatted = formatter.format(lineChange);
 
-        assertThat(formatted).isEqualTo(CONSTANT_NAME + ": D");
+        assertThat(formatted).isEqualTo("Disable         constant");
     }
 
     @Test
@@ -71,7 +71,7 @@ class LineChangeFormatterTest {
 
         final var formatted = formatter.format(lineChange);
 
-        assertThat(formatted).isEqualTo(CONSTANT_NAME + ": E&C value → new value");
+        assertThat(formatted).isEqualTo("Enable & Change constant: value → new value");
     }
 
     @Test
@@ -80,7 +80,7 @@ class LineChangeFormatterTest {
 
         final var formatted = formatter.format(lineChange);
 
-        assertThat(formatted).isEqualTo(CONSTANT_NAME + ": C value → new value");
+        assertThat(formatted).isEqualTo("Change          constant: value → new value");
     }
 
     @Test
@@ -98,7 +98,7 @@ class LineChangeFormatterTest {
 
         final var formatted = formatter.format(lineChange);
 
-        assertThat(formatted).isEqualTo(CONSTANT_NAME + ": ERROR a violation");
+        assertThat(formatted).isEqualTo("Error           constant: a violation");
     }
 
     private LineChange lineChange(final LineChange.DiffEnum diff, final String oldValue, final String wantedValue) {

@@ -4,12 +4,28 @@ import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.util.Map;
+
 @Component
 public class LineChangeFormatter {
-    private static final char DISABLE = 'D';
-    private static final char ENABLE = 'E';
-    private static final char CHANGE = 'C';
-    private static final String ENABLE_AND_CHANGE = String.format("%s&%s", ENABLE, CHANGE);
+    private static final String DISABLE =
+            "Disable        ";
+    private static final String ENABLE =
+            "Enable         ";
+    private static final String CHANGE =
+            "Change         ";
+    private static final String ERROR =
+            "Error          ";
+    private static final String ENABLE_AND_CHANGE =
+            "Enable & Change";
+
+    private static final Map<LineChange.DiffEnum, String> FORMAT_DIFF_MAPPING = Map.of(
+            LineChange.DiffEnum.TO_DISABLE, DISABLE,
+            LineChange.DiffEnum.TO_ENABLE, ENABLE,
+            LineChange.DiffEnum.TO_ENABLE_AND_CHANGE_VALUE, ENABLE_AND_CHANGE,
+            LineChange.DiffEnum.CHANGE_VALUE, CHANGE,
+            LineChange.DiffEnum.ERROR, ERROR
+    );
 
     /**
      * To format like CONSTANT: E&C 15 → 18<br>
@@ -19,34 +35,27 @@ public class LineChangeFormatter {
             return null;
         }
         final var output = new StringBuilder();
+        if (FORMAT_DIFF_MAPPING.containsKey(lineChange.getDiff())) {
+            output.append(FORMAT_DIFF_MAPPING.get(lineChange.getDiff()));
+            output.append(" ");
+        }
         output.append(lineChange.getConstant().getName());
-        output.append(": ");
         switch (lineChange.getDiff()) {
             case DO_NOTHING:
-                output.append("Nothing to do");
+                output.append(": Nothing to do");
                 break;
             case TO_DISABLE:
-                output.append(DISABLE);
-                break;
             case TO_ENABLE:
-                output.append(ENABLE);
                 break;
             case TO_ENABLE_AND_CHANGE_VALUE:
-                output.append(ENABLE_AND_CHANGE);
-                output.append(' ');
-                formatValue(lineChange.getConstant().getCurrentValue(), output);
-                output.append(" → ");
-                formatValue(lineChange.getConstant().getWantedValue(), output);
-                break;
             case CHANGE_VALUE:
-                output.append(CHANGE);
-                output.append(' ');
+                output.append(": ");
                 formatValue(lineChange.getConstant().getCurrentValue(), output);
                 output.append(" → ");
                 formatValue(lineChange.getConstant().getWantedValue(), output);
                 break;
             case ERROR:
-                output.append("ERROR ");
+                output.append(": ");
                 output.append(lineChange.getViolation());
                 break;
             default:

@@ -21,7 +21,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -29,7 +28,7 @@ import java.util.stream.Collectors;
 @Parameters(commandNames = "apply", commandDescription = "Apply the given profile to marlin constants files, that will enable, change value or disable constants into marlin configuration files")
 @RequiredArgsConstructor
 public class ApplyCommand implements Command {
-    @Parameter(required = true, description = "/path1 /path2 ...\tFile(s) path(s) where all changes will be applied")
+    @Parameter(required = true, description = "/path1 /path2 ...\tFile or directory path(s) where all changes will be applied")
     private List<Path> filesPath;
     @Parameter(names = {"--profile", "-p"}, required = true, description = "Profile's path containing changes to apply. Format: yaml")
     private Path profilePath;
@@ -74,14 +73,37 @@ public class ApplyCommand implements Command {
                            Mono.fromRunnable(() -> consoleHelper
                                    .writeLine(String.format("%s change(s) to apply for file %s:", fileChanges.getValue().stream().filter(this::isModifyingChange)
                                                                                                              .count(), fileChanges
-                                                                    .getKey()))),
-                           Flux.fromIterable(fileChanges.getValue()).filter(LineChange::isConstant).doOnNext(change -> consoleHelper
-                                   .writeLine(lineChangeFormatter.format(change), change
-                                           .getDiff() == LineChange.DiffEnum.DO_NOTHING ? ConsoleHelper.ColorEnum.DEFAULT : ConsoleHelper.ColorEnum.YELLOW)),
-                           Mono.fromRunnable(() -> consoleHelper.writeLine(""))
+                                                                    .getKey()), ConsoleHelper.FormatterEnum.UNDERLINED, ConsoleHelper.FormatterEnum.BOLD, ConsoleHelper.ForegroundColorEnum.GREEN)),
+                           Flux.fromIterable(fileChanges.getValue())
+                               .filter(LineChange::isConstant)
+                               .filter(c -> c.getDiff() != LineChange.DiffEnum.DO_NOTHING)
+                               .doOnNext(change -> consoleHelper.writeLine(lineChangeFormatter.format(change), getChangeColor(change))),
+                           Flux.fromIterable(fileChanges.getValue())
+                               .filter(LineChange::isConstant)
+                               .filter(c -> c.getDiff() == LineChange.DiffEnum.DO_NOTHING)
+                               .doOnNext(change -> consoleHelper.writeLine(lineChangeFormatter.format(change), getChangeColor(change))),
+                           Mono.fromRunnable(consoleHelper::newLine)
                    ))
                    .then()
                 ;
+    }
+
+    private ConsoleHelper.ConsoleStyle[] getChangeColor(final LineChange change) {
+        switch (change.getDiff()) {
+            case ERROR:
+                return new ConsoleHelper.ConsoleStyle[]{ConsoleHelper.ForegroundColorEnum.RED};
+            case CHANGE_VALUE:
+                return new ConsoleHelper.ConsoleStyle[]{ConsoleHelper.ForegroundColorEnum.LIGHT_BLUE};
+            case TO_DISABLE:
+                return new ConsoleHelper.ConsoleStyle[]{ConsoleHelper.ForegroundColorEnum.LIGHT_YELLOW};
+            case TO_ENABLE:
+                return new ConsoleHelper.ConsoleStyle[]{ConsoleHelper.ForegroundColorEnum.LIGHT_CYAN};
+            case TO_ENABLE_AND_CHANGE_VALUE:
+                return new ConsoleHelper.ConsoleStyle[]{ConsoleHelper.ForegroundColorEnum.LIGHT_MAGENTA};
+            case DO_NOTHING:
+            default:
+                return new ConsoleHelper.ConsoleStyle[]{ConsoleHelper.ForegroundColorEnum.DARK_GRAY};
+        }
     }
 
     private Mono<Void> printUnusedConstants(final Map<Path, List<LineChange>> changes, final Map<String, Constant> wantedConstants) {
@@ -97,7 +119,7 @@ public class ApplyCommand implements Command {
             return Mono.empty();
         }
         return Mono.fromRunnable(() -> consoleHelper.writeLine("Apply changes ? type 'y' to apply changes, or everything else to cancel"))
-                   .then(Mono.fromSupplier(() -> new Scanner(System.in).next()))
+                   .then(Mono.fromSupplier(consoleHelper::readLine))
                    .filter("y"::equals)
                    .switchIfEmpty(Mono.error(() -> new ManuallyStoppedException("User refused to apply")))
                    .then();
