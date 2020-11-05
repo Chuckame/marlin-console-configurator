@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.nio.file.Path;
 import java.util.Collection;
@@ -49,17 +50,29 @@ public class ApplyCommand implements Command {
         return profilePropertiesParser.parseFromFile(profilePath)
                                       .map(changeAdapter::profileToConstants)
                                       .flatMap(wantedConstants ->
-                                                       prepareChanges(filesPath, wantedConstants)
+                                                       prepareChanges(wantedConstants)
                                                                .flatMap(changes -> printChanges(changes)
                                                                        .then(printUnusedConstants(changes, wantedConstants))
                                                                        .then(doSave ? checkIfUserAgree().then(applyAndSaveChanges(changes)) : Mono.empty()))
                                       );
     }
 
+    public Mono<Map<Path, List<LineChange>>> prepareChanges(final Map<String, Constant> wantedConstants) {
+        return fileHelper.listFiles(filesPath)
+                         .flatMap(filePath -> fileHelper.lines(filePath)
+                                                        .index()
+                                                        .concatMap(line -> lineChangeManager.prepareChange(line.getT2(), line.getT1().intValue(), wantedConstants))
+                                                        .collectList()
+                                                        .filter(changes -> changes.stream().anyMatch(LineChange::isConstant))
+                                                        .map(changes -> Tuples.of(filePath, changes)))
+                         .collectMap(Tuple2::getT1, Tuple2::getT2);
+    }
+
     private Mono<Void> printChanges(final Map<Path, List<LineChange>> changes) {
         return Flux.fromIterable(changes.entrySet())
                    .concatMap(fileChanges -> Flux.concat(
-                           Flux.just(String.format("%s change(s) for file %s:", fileChanges.getValue().size(), fileChanges.getKey())),
+                           Flux.just(String.format("%s change(s) to apply for file %s:", fileChanges.getValue().stream().filter(this::isModifyingChange).count(), fileChanges
+                                   .getKey())),
                            Flux.fromIterable(fileChanges.getValue()).filter(LineChange::isConstant).map(lineChangeFormatter::format),
                            Flux.just("")
                    ))
@@ -72,7 +85,7 @@ public class ApplyCommand implements Command {
         return lineChangeManager.getUnusedWantedConstants(changes.values().stream().flatMap(List::stream).collect(Collectors.toList()), wantedConstants)
                                 .collectList()
                                 .filter(Predicate.not(List::isEmpty))
-                                .doOnNext(unusedConstants -> consoleHelper.writeLine(String.format("Still some unused constants: %s%n", unusedConstants)))
+                                .doOnNext(unusedConstants -> consoleHelper.writeLine(String.format("Still some unused constants: %s", unusedConstants)))
                                 .then();
     }
 
@@ -87,21 +100,20 @@ public class ApplyCommand implements Command {
                    .then();
     }
 
-    public Mono<Map<Path, List<LineChange>>> prepareChanges(final List<Path> filesPath, final Map<String, Constant> wantedConstants) {
-        return fileHelper.listFiles(filesPath)
-                         .flatMap(filePath -> fileHelper.lines(filePath)
-                                                        .index()
-                                                        .concatMap(line -> lineChangeManager.prepareChange(line.getT2(), line.getT1().intValue(), wantedConstants))
-                                                        .collectList()
-                                                        .zipWith(Mono.just(filePath)))
-                         .collectMap(Tuple2::getT2, Tuple2::getT1);
-    }
-
     public Mono<Void> applyAndSaveChanges(final Map<Path, List<LineChange>> changes) {
         return Flux.fromIterable(changes.entrySet())
+                   .filter(e -> onlyChangedFile(e.getValue()))
                    .groupBy(Map.Entry::getKey, Map.Entry::getValue)
                    .flatMap(fileChanges -> fileHelper.write(fileChanges.key(), true, fileChanges.flatMap(this::applyChanges)))
                    .then();
+    }
+
+    private boolean onlyChangedFile(final List<LineChange> changes) {
+        return changes.stream().anyMatch(this::isModifyingChange);
+    }
+
+    private boolean isModifyingChange(final LineChange change) {
+        return !LineChange.DiffEnum.DO_NOTHING.equals(change.getDiff());
     }
 
     public Flux<String> applyChanges(final Collection<LineChange> changes) {

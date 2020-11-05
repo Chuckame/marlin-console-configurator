@@ -4,9 +4,14 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.ParameterException;
 import fr.chuckame.marlinfw.configurator.util.ConsoleHelper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class CommandRunner implements CommandLineRunner {
@@ -20,6 +25,14 @@ public class CommandRunner implements CommandLineRunner {
         } catch (final ManuallyStoppedException e) {
             consoleHelper.writeErrorLine(e.getMessage());
             System.exit(e.getExitCode());
+        } catch (final Exception e) {
+            if (e.getCause() instanceof NoSuchFileException) {
+                consoleHelper.writeErrorLine("File not found: " + Path.of(e.getCause().getMessage()).toAbsolutePath());
+                System.exit(4);
+            } else {
+                consoleHelper.writeErrorLine(e.getMessage());
+                System.exit(5);
+            }
         }
     }
 
