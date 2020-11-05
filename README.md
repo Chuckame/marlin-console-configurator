@@ -1,40 +1,157 @@
-# marlin-console-configurator
-
 ![Release](https://github.com/Chuckame/marlin-console-configurator/workflows/Release/badge.svg)
+[![Buy me a beer](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=CQ6WPNYRBSWUU&item_name=Buy+me+a+beer&currency_code=EUR)
 
-[Example profile.yaml](example/profile.yaml)
-Notes:
-- we don't care about the order
-- we don't care about the constant location (in which file we enable/disable a constant), because if there is missing constant from output files, the script will exit without doing any modification
+# Marlin Console Configurator
 
-# Regex:
-```regex
-^(?:\h*(\/\/))?\h*#define\h+(\w+)(?:\h+([^\/\r\n]+))?(\h*\/\/\h*(.+))?$
+*The life is too short to configure Marlin*
+
+If you want to modify and share easily your Marlin configuration, Marlin Console Configurator is for **YOU**
+
+- [Marlin Console Configurator](#marlin-console-configurator)
+  * [Go quickly with docker](#go-quickly-with-docker)
+  * [Docker alternative: Downloading binaries](#docker-alternative-downloading-binaries)
+    + [Linux, MacOS, unix-like](#linux-macos-unix-like)
+    + [Windows](#windows)
+  * [Execute from sources](#execute-from-sources)
+  * [How to use it](#how-to-use-it)
+    + [Concrete example: show all changes without saving (just output to console)](#concrete-example-show-all-changes-without-saving-just-output-to-console)
+    + [Concrete example: show all changes and save modifications to Marlin firmware files](#concrete-example-show-all-changes-and-save-modifications-to-marlin-firmware-files)
+    + [Concrete example: Create a profile from your current config](#concrete-example-create-a-profile-from-your-current-config)
+  * [Usage](#usage)
+  * [Credits](#credits)
+
+Cool things:
+- No need to fork Marlin repository, and have a git pull-rebase-conflicts-f**k. Just download/clone last Marlin sources and run marlin-console-configuration onto wanted profile.
+  - Hey bro', I have 5 printers, and it is a loot difficult to maintain Marlin up-to-date for all printers...
+  - No problem, just use same Marlin repository, while you just have to apply 5 different profiles
+  - Naaaaahh, really ?
+  - Yes, it is as simple as it is
+- You can share your profile with friends, or on a tutorial.
+- It is not doing anything else than modifying C/C++ header files (`.h`), so it don't care about Marlin version !
+- It will not add/remove/reorder constants, but just modifying only what is needed :)
+
+Bad things:
+- This tool is so quick that you have no time to take a coffee while it is running :D
+- Complex guys that loves complex things won't love it... Too simple !
+
+## Go quickly with docker
+Just run the following command.
+
+```shell script
+cd /path/to/Marlin
+docker run --rm -it -v ${pwd}:/app/files chuckame/marlin-console-configurator [command] [command options]
 ```
 
-|Group index|Name|Comment|Can be absent|
-|---|---|---|---|
-|0|Full matched line|||
-|1|Indicates if the constant is enabled or not|enabled (absent/empty group) or disabled (present/non-empty group)|yes|
-|2|Constant name|No need to be trimmed|no|
-|3|Value|Contains the value of the constant. Must be trimmed to have the real value|yes|
-|4|Comment|More info about the constant, without `//`. Note: only the line is matched, so we cannot easily determine if there is a previous/next/multiline comment|yes|
+Since docker need to access to your Marlin configuration folder/files AND your profile, this is why there is `${pwd}:/app/files` volume.
+But, because of this volume, you cannot go trought the current folder's parents using `../` from marlin-console-configurator parameters.
 
-# Lexic
-- output: indicates `Configuration.h` and `Configuration_adv.h`
+Example for `apply` command with the following folder architecture:
+```
+3d-printing/
+├── profiles/
+│   └── ender-3-pro.yaml
+└── MarlinFirmware/
+    └── Marlin/
+        ├── Configuration.h
+        └── Configuration_adv.h
+```
+Execute the command:
+```shell script
+cd 3d-printing/
+docker run --rm -it -v ${pwd}:/app/files chuckame/marlin-console-configurator apply ./MarlinFirmware/Marlin -p ./profiles/ender-3-pro.yaml
+```
 
-# Todo
-- Can create a profileProperties.yaml from output
-- Can create a backup.yaml from output
+> Actually only compatible with amd64 architectures. If you want to execute on other arch, like armv7 for raspberry pi, you can directly [use binaries](#downloading-binaries), while you can create an issue if you really want marlin-console-configurator on your arch.
 
-# Done
-- Regex for parsing constants
-- Design the `profileProperties.yaml`
-- When a constant is disabled (profileProperties) but enabled in output: just prefix with `//` without modifying the line
-- When a constant is disabled (profileProperties) and disabled in output: do nothing
-- When a constant is enabled (profileProperties) and enabled in output with same value (or no value for both): do nothing
-- When a constant is enabled (profileProperties) with value and enabled in output without value: ERROR
-- When a constant is enabled (profileProperties) without value and enabled in output with value: ERROR
-- When a constant is defined in profileProperties (enabled or disabled), while it isn't into output (non-present): ERROR
-- When a constant is enabled (profileProperties) but disabled in output: remove the prefix `//` and adjust the value from profileProperties without modifying the rest of the line.
-- When a constant is not defined in profileProperties while it is in output (enabled or disabled): warn like `Oh, XXX is not defined in profileProperties`
+## Docker alternative: Downloading binaries
+Download `marlin-console-configurator.zip` from [Releases](https://github.com/Chuckame/marlin-console-configurator/releases) and extract it.
+
+The unzipped folder will contain those files:
+```
+marlin-console-configurator/
+├── bin/
+│   ├── marlin-console-configurator      # Entrypoint script for unix-like OS
+│   └── marlin-console-configurator.bat  # Entrypoint script for windows OS
+└── lib/
+    └── marlin-console-configurator.jar  # The marlin-console-configurator
+```
+
+How to use it:
+
+### Linux, MacOS, unix-like
+```shell script
+cd ./marlin-console-configurator/bin
+./marlin-console-configurator help
+```
+
+### Windows
+```shell script
+cd ./marlin-console-configurator/bin
+marlin-console-configurator.bat help
+```
+
+## Execute from sources
+```shell script
+./gradlew bootRun help
+```
+
+## How to use it
+
+### Concrete example: show all changes without saving (just output to console)
+```shell script
+marlin-console-configurator apply ./Marlin -p ./ender-3-abl.yml
+```
+You will see something like this:
+![apply-without-saving](./docs/images/apply-without-saving.png)
+
+
+### Concrete example: show all changes and save modifications to Marlin firmware files
+```shell script
+marlin-console-configurator apply ./Marlin -p ./ender-3-abl.yml --save
+```
+> Only needed modifications will be saved.
+
+### Concrete example: Create a profile from your current config
+```shell script
+marlin-console-configurator generate-profile ./Marlin -o ./my-new-profile.yml
+```
+
+## Usage
+
+```
+Commands:
+  apply      Apply the given profile to marlin constants files, that will enable, change value or disable constants into marlin configuration files
+    Usage: apply [options] /path1 /path2 ...	File or directory path(s) where all changes will be applied
+      Options:
+      * --profile, -p
+          Profile's path containing changes to apply. Format: yaml
+        --save, -s
+          When is present, will save changes to files. Else, just display changes without saving
+        --yes, -y
+          When present, the changes will be saved without prompting the user
+  
+  diff      Display differences between marlin configuration files
+    Usage: diff [options]
+      Options:
+      * --left
+          marlin configuration folder or files paths for left comparison
+      * --right
+          marlin configuration folder or files paths for right comparison
+  
+  generate-profile      Generate a profile from given marlin constants files
+    Usage: generate-profile [options] /path1 /path2 ...	The marlin constants folder or files paths
+      Options:
+      * --output, -o
+          The output profile path, will be overwritten if already existing file. If 'console' is specified, the profile will just be printed to the console
+  
+  help      Display this help message
+    Usage: help
+```
+
+## Tasks
+
+### Todo
+- Can create a backup.yaml when applying
+
+## Credits
+Made with :heart: by Chuckame
