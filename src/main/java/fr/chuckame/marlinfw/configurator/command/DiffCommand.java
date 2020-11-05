@@ -64,7 +64,7 @@ public class DiffCommand implements Command {
                                 .doOnNext(removedConstant -> consoleHelper.writeLine(removedConstant, ConsoleHelper.ForegroundColorEnum.RED))
                                 .then();
         final var modified = Flux.fromIterable(diff.entriesDiffering().values())
-                                 .map(modifiedConstant -> lineChangeManager.toLineChange("", 1, modifiedConstant.leftValue(), modifiedConstant.rightValue()))
+                                 .map(modifiedConstant -> lineChangeManager.toLineChange("", 1, modifiedConstant.leftValue(), modifiedConstant.rightValue(), null))
                                  .map(lineChangeFormatter::format)
                                  .doOnNext(msg -> consoleHelper.writeLine(msg, ConsoleHelper.ForegroundColorEnum.CYAN))
                                  .then();

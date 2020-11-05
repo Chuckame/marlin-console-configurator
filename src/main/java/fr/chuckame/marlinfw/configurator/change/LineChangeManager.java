@@ -1,6 +1,7 @@
 package fr.chuckame.marlinfw.configurator.change;
 
 import fr.chuckame.marlinfw.configurator.constant.Constant;
+import fr.chuckame.marlinfw.configurator.constant.ConstantLineDetails;
 import fr.chuckame.marlinfw.configurator.constant.ConstantLineInterpreter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
@@ -61,7 +62,8 @@ public class LineChangeManager {
                    .filter(Predicate.not(constantsFound::contains));
     }
 
-    public LineChange toLineChange(final String line, final int lineNumber, final Constant parsedConstant, @Nullable final Constant wantedConstant) {
+    public LineChange toLineChange(final String line, final int lineNumber, final Constant parsedConstant,
+                                   @Nullable final Constant wantedConstant, @Nullable final ConstantLineDetails lineDetails) {
         final var violation = lineChangeValidator.getViolation(parsedConstant, wantedConstant);
         return LineChange.builder()
                          .line(line)
@@ -74,24 +76,12 @@ public class LineChangeManager {
                                                                 .build())
                          .diff(violation != null ? LineChange.DiffEnum.ERROR : computeDiff(parsedConstant, wantedConstant))
                          .violation(violation)
+                         .constantLineDetails(lineDetails)
                          .build();
     }
 
     private LineChange toLineChange(final String line, final int lineNumber, final ConstantLineInterpreter.ParsedConstant parsedConstant, @Nullable final Constant wantedConstant) {
-        final var violation = lineChangeValidator.getViolation(parsedConstant.getConstant(), wantedConstant);
-        return LineChange.builder()
-                         .line(line)
-                         .lineNumber(lineNumber)
-                         .constant(LineChange.LineChangeConstant.builder()
-                                                                .name(parsedConstant.getConstant().getName())
-                                                                .comment(parsedConstant.getConstant().getComment())
-                                                                .currentValue(parsedConstant.getConstant().getValue())
-                                                                .wantedValue(Optional.ofNullable(wantedConstant).map(Constant::getValue).orElse(null))
-                                                                .build())
-                         .diff(violation != null ? LineChange.DiffEnum.ERROR : computeDiff(parsedConstant.getConstant(), wantedConstant))
-                         .violation(violation)
-                         .constantLineDetails(parsedConstant.getConstantLineDetails())
-                         .build();
+        return toLineChange(line, lineNumber, parsedConstant.getConstant(), wantedConstant, parsedConstant.getConstantLineDetails());
     }
 
     private LineChange.DiffEnum computeDiff(final Constant parsedConstant, @Nullable final Constant wantedConstant) {
