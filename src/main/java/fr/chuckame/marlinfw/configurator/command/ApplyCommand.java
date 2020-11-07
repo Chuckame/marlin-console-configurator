@@ -88,21 +88,21 @@ public class ApplyCommand implements Command {
                 ;
     }
 
-    private ConsoleHelper.ConsoleStyle[] getChangeColor(final LineChange change) {
+    private ConsoleHelper.ConsoleStyle getChangeColor(final LineChange change) {
         switch (change.getDiff()) {
             case ERROR:
-                return new ConsoleHelper.ConsoleStyle[]{ConsoleHelper.ForegroundColorEnum.RED};
+                return ConsoleHelper.ForegroundColorEnum.RED;
             case CHANGE_VALUE:
-                return new ConsoleHelper.ConsoleStyle[]{ConsoleHelper.ForegroundColorEnum.LIGHT_BLUE};
+                return ConsoleHelper.ForegroundColorEnum.LIGHT_BLUE;
             case TO_DISABLE:
-                return new ConsoleHelper.ConsoleStyle[]{ConsoleHelper.ForegroundColorEnum.LIGHT_YELLOW};
+                return ConsoleHelper.ForegroundColorEnum.LIGHT_YELLOW;
             case TO_ENABLE:
-                return new ConsoleHelper.ConsoleStyle[]{ConsoleHelper.ForegroundColorEnum.LIGHT_CYAN};
+                return ConsoleHelper.ForegroundColorEnum.LIGHT_CYAN;
             case TO_ENABLE_AND_CHANGE_VALUE:
-                return new ConsoleHelper.ConsoleStyle[]{ConsoleHelper.ForegroundColorEnum.LIGHT_MAGENTA};
+                return ConsoleHelper.ForegroundColorEnum.LIGHT_MAGENTA;
             case DO_NOTHING:
             default:
-                return new ConsoleHelper.ConsoleStyle[]{ConsoleHelper.ForegroundColorEnum.DARK_GRAY};
+                return ConsoleHelper.ForegroundColorEnum.DARK_GRAY;
         }
     }
 
