@@ -23,9 +23,14 @@ public class ConstantLineInterpreter {
 
     public Mono<ParsedConstant> parseLine(final String line) {
         return Mono.just(line)
+                   .filter(this::isNotMultilineValue)
                    .map(CONSTANT_REGEX::matcher)
                    .filter(Matcher::matches)
                    .map(this::toConstant);
+    }
+
+    private boolean isNotMultilineValue(final String line) {
+        return !line.endsWith("\\");
     }
 
     public Mono<String> disableLine(final ConstantLineDetails constantLineDetails) {

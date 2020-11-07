@@ -1,5 +1,6 @@
 package fr.chuckame.marlinfw.configurator.constant;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -8,6 +9,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ConstantLineInterpreterTest {
     private final ConstantLineInterpreter constantLineInterpreter = new ConstantLineInterpreter();
+
+    // fixme cannot parse following lines when first line ending with backslash '\': https://github.com/Chuckame/marlin-console-configurator/issues/1
+    @Test
+    void TEMPORARY_FIX_parseLineShouldReturnNothingWhenValueEndsWithBackslash() {
+        final var line = "#define CONSTANT value \\";
+
+        final var constant = constantLineInterpreter.parseLine(line);
+
+        assertThat(constant.blockOptional()).isEmpty();
+    }
 
     @ParameterizedTest
     @CsvSource({

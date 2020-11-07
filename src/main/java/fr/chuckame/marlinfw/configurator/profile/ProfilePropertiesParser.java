@@ -61,6 +61,13 @@ public class ProfilePropertiesParser {
                         opts.setIndicatorIndent(indentation);
                         return opts;
                     }
+
+                    @Override
+                    public void writeNull() throws IOException {
+                        _verifyValueWrite("write null value");
+                        // no real type for this, is there?
+                        _writeScalar("", "object", DumperOptions.ScalarStyle.PLAIN);
+                    }
                 };
             }
         };

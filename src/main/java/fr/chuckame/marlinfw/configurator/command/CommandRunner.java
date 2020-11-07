@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 
@@ -29,6 +30,9 @@ public class CommandRunner implements CommandLineRunner {
             if (e.getCause() instanceof NoSuchFileException) {
                 consoleHelper.writeErrorLine("File not found: " + Path.of(e.getCause().getMessage()).toAbsolutePath());
                 System.exit(4);
+            } else if (e.getCause() instanceof FileAlreadyExistsException) {
+                consoleHelper.writeErrorLine("File already present: " + Path.of(e.getCause().getMessage()).toAbsolutePath());
+                System.exit(6);
             } else {
                 consoleHelper.writeErrorLine(e.getMessage());
                 System.exit(5);
