@@ -40,7 +40,7 @@ Just run the following command.
 
 ```shell script
 cd /path/to/Marlin
-docker run --rm -it -v ${PWD}:/app/files chuckame/marlin-console-configurator [command] [command options]
+docker run --rm -it -v ${PWD}:/app/files chuckame/marlin-console-configurator help
 ```
 
 Since docker need to access to your Marlin configuration folder/files AND your profile, this is why there is `${PWD}:/app/files` volume.
