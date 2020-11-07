@@ -5,7 +5,11 @@
 
 *The life is too short to configure Marlin*
 
-If you want to modify and share easily your Marlin configuration, Marlin Console Configurator is for **YOU**
+If you want to modify and share easily your Marlin configuration, Marlin Console Configurator is for **YOU**. 
+
+Tired of finding each constants by hands to modify and switch between files?
+
+This tool will help you to disable, enable and changes values into your Marlin firmware (currently Configuration.h & Configuration_adv.h) with just only a minimalistic wanted config. 
 
 - [Marlin Console Configurator](#marlin-console-configurator)
   * [Go quickly with docker](#go-quickly-with-docker)
