@@ -7,6 +7,7 @@ import fr.chuckame.marlinfw.configurator.change.LineChangeFormatter;
 import fr.chuckame.marlinfw.configurator.change.LineChangeManager;
 import fr.chuckame.marlinfw.configurator.constant.Constant;
 import fr.chuckame.marlinfw.configurator.constant.ProfilePropertiesChangeAdapter;
+import fr.chuckame.marlinfw.configurator.profile.ProfileProperties;
 import fr.chuckame.marlinfw.configurator.profile.ProfilePropertiesParser;
 import fr.chuckame.marlinfw.configurator.util.ConsoleHelper;
 import fr.chuckame.marlinfw.configurator.util.FileHelper;
@@ -30,8 +31,8 @@ import java.util.stream.Collectors;
 public class ApplyCommand implements Command {
     @Parameter(required = true, description = "/path1 /path2 ...\tFile or directory path(s) where all changes will be applied")
     private List<Path> filesPath;
-    @Parameter(names = {"--profile", "-p"}, required = true, description = "Profile's path containing changes to apply. Format: yaml")
-    private Path profilePath;
+    @Parameter(names = {"--profiles", "-p"}, variableArity = true, required = true, description = "Profile's path(s) (space separated) containing changes to apply. Format: yaml")
+    private List<Path> profilePaths;
     @Parameter(names = {"--save", "-s"}, description = "When is present, will save changes to files. Else, just display changes without saving")
     private boolean doSave;
     @Parameter(names = {"--yes", "-y"}, description = "when present, the changes will be saved without prompting the user")
@@ -46,14 +47,16 @@ public class ApplyCommand implements Command {
 
     @Override
     public Mono<Void> run() {
-        return profilePropertiesParser.parseFromFile(profilePath)
-                                      .map(changeAdapter::profileToConstants)
-                                      .flatMap(wantedConstants ->
-                                                       prepareChanges(wantedConstants)
-                                                               .flatMap(changes -> printChanges(changes)
-                                                                       .then(printUnusedConstants(changes, wantedConstants))
-                                                                       .then(doSave ? checkIfUserAgree().then(applyAndSaveChanges(changes)) : Mono.empty()))
-                                      );
+        return fileHelper.listFiles(profilePaths)
+                         .flatMap(profilePropertiesParser::parseFromFile)
+                         .reduceWith(ProfileProperties::new, ProfileProperties::merge)
+                         .map(changeAdapter::profileToConstants)
+                         .flatMap(wantedConstants ->
+                                          prepareChanges(wantedConstants)
+                                                  .flatMap(changes -> printChanges(changes)
+                                                          .then(printUnusedConstants(changes, wantedConstants))
+                                                          .then(doSave ? checkIfUserAgree().then(applyAndSaveChanges(changes)) : Mono.empty()))
+                         );
     }
 
     public Mono<Map<Path, List<LineChange>>> prepareChanges(final Map<String, Constant> wantedConstants) {

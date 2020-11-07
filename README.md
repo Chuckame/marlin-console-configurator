@@ -40,17 +40,20 @@ Just run the following command.
 
 ```shell script
 cd /path/to/Marlin
-docker run --rm -it -v ${pwd}:/app/files chuckame/marlin-console-configurator [command] [command options]
+docker run --rm -it -v ${PWD}:/app/files chuckame/marlin-console-configurator [command] [command options]
 ```
 
-Since docker need to access to your Marlin configuration folder/files AND your profile, this is why there is `${pwd}:/app/files` volume.
+Since docker need to access to your Marlin configuration folder/files AND your profile, this is why there is `${PWD}:/app/files` volume.
 But, because of this volume, you cannot go trought the current folder's parents using `../` from marlin-console-configurator parameters.
 
 Example for `apply` command with the following folder architecture:
 ```
 3d-printing/
 ├── profiles/
-│   └── ender-3-pro.yaml
+│   ├── ender-3-pro-base.yaml
+│   ├── ender-3-pro-mbl.yaml
+│   ├── ender-3-pro-runout-sensor.yaml
+│   └── ender-3-pro-abl.yaml
 └── MarlinFirmware/
     └── Marlin/
         ├── Configuration.h
@@ -59,7 +62,7 @@ Example for `apply` command with the following folder architecture:
 Execute the command:
 ```shell script
 cd 3d-printing/
-docker run --rm -it -v ${pwd}:/app/files chuckame/marlin-console-configurator apply ./MarlinFirmware/Marlin -p ./profiles/ender-3-pro.yaml
+docker run --rm -it -v ${PWD}:/app/files chuckame/marlin-console-configurator apply ./MarlinFirmware/Marlin -p ./profiles/ender-3-pro.yaml
 ```
 
 > Actually only compatible with amd64 architectures. If you want to execute on other arch, like armv7 for raspberry pi, you can directly [use binaries](#downloading-binaries), while you can create an issue if you really want marlin-console-configurator on your arch.
@@ -100,7 +103,7 @@ marlin-console-configurator.bat help
 
 ### Concrete example: show all changes without saving (just output to console)
 ```shell script
-marlin-console-configurator apply ./Marlin -p ./ender-3-abl.yml
+marlin-console-configurator apply ./Marlin -p ./ender-3-base.yml ./ender-3-abl.yml
 ```
 You will see something like this:
 ![apply-without-saving](./docs/images/apply-without-saving.png)
@@ -120,33 +123,38 @@ marlin-console-configurator generate-profile ./Marlin -o ./my-new-profile.yml
 ## Usage
 
 ```
-Commands:
-  apply      Apply the given profile to marlin constants files, that will enable, change value or disable constants into marlin configuration files
-    Usage: apply [options] /path1 /path2 ...	File or directory path(s) where all changes will be applied
-      Options:
-      * --profile, -p
-          Profile's path containing changes to apply. Format: yaml
-        --save, -s
-          When is present, will save changes to files. Else, just display changes without saving
-        --yes, -y
-          When present, the changes will be saved without prompting the user
-  
-  diff      Display differences between marlin configuration files
-    Usage: diff [options]
-      Options:
-      * --left
-          marlin configuration folder or files paths for left comparison
-      * --right
-          marlin configuration folder or files paths for right comparison
-  
-  generate-profile      Generate a profile from given marlin constants files
-    Usage: generate-profile [options] /path1 /path2 ...	The marlin constants folder or files paths
-      Options:
-      * --output, -o
-          The output profile path, will be overwritten if already existing file. If 'console' is specified, the profile will just be printed to the console
-  
-  help      Display this help message
-    Usage: help
+Usage: marlin-console-configurator [command] [command options]
+  Commands:
+    apply      Apply the given profile to marlin constants files, that will enable, change value or disable constants into marlin 
+            configuration files
+      Usage: apply [options] /path1 /path2 ...	File or directory path(s) where all changes will be applied
+        Options:
+        * --profiles, -p
+            Profile's path(s) (space separated) containing changes to apply. Format: yaml
+          --save, -s
+            When is present, will save changes to files. Else, just display changes without saving
+            Default: false
+          --yes, -y
+            when present, the changes will be saved without prompting the user
+            Default: false
+
+    diff      Display differences between marlin configuration files
+      Usage: diff [options]
+        Options:
+        * --left
+            marlin configuration folder or files paths for the base of diff
+        * --right
+            marlin configuration folder or files paths to know what was changed since --source paths
+
+    generate-profile      Generate a profile from given marlin constants files
+      Usage: generate-profile [options] /path1 /path2 ...	The marlin constants folder or files paths
+        Options:
+        * --output, -o
+            The output profile path, will be overwritten if already existing file. If 'console' is specified, the profile will just be 
+            printed to the console
+
+    help      Display this help message
+      Usage: help
 ```
 
 ## Tasks
