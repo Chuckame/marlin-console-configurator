@@ -7,8 +7,6 @@
 
 If you want to modify and share easily your Marlin configuration, Marlin Console Configurator is for **YOU**. 
 
-Tired of finding each constants by hands to modify and switch between files?
-
 This tool will help you to disable, enable and changes values into your Marlin firmware (currently Configuration.h & Configuration_adv.h) with just only a minimalistic wanted config. 
 
 - [Marlin Console Configurator](#marlin-console-configurator)
@@ -22,17 +20,16 @@ This tool will help you to disable, enable and changes values into your Marlin f
     + [Concrete example: show all changes and save modifications to Marlin firmware files](#concrete-example-show-all-changes-and-save-modifications-to-marlin-firmware-files)
     + [Concrete example: Create a profile from your current config](#concrete-example-create-a-profile-from-your-current-config)
   * [Usage](#usage)
+  * [A problem?](#a-problem)
   * [Credits](#credits)
 
 Cool things:
 - No need to fork Marlin repository, and have a git pull-rebase-conflicts-f**k. Just download/clone last Marlin sources and run marlin-console-configuration onto wanted profile.
-  - Hey bro', I have 5 printers, and it is a loot difficult to maintain Marlin up-to-date for all printers...
-  - No problem, just use same Marlin repository, while you just have to apply 5 different profiles
-  - Naaaaahh, really ?
-  - Yes, it is as simple as it is
-- You can share your profile with friends, or on a tutorial.
+- No more Ctrl+F to find the constant to change
+- Same Marlin version/code, when you can apply the wanted profile of targeted printer
+- Share profile with friends, or on a tutorial.
 - It is not doing anything else than modifying C/C++ header files (`.h`), so it don't care about Marlin version !
-- It will not add/remove/reorder constants, but just modifying only what is needed :)
+- It will not add/remove/reorder constants, but just modifying only what you wanted into your profile :)
 
 Bad things:
 - This tool is so quick that you have no time to take a coffee while it is running :D
@@ -110,7 +107,7 @@ marlin-console-configurator.bat help
 marlin-console-configurator apply ./Marlin -p ./ender-3-base.yml ./ender-3-abl.yml
 ```
 You will see something like this:
-![apply-without-saving](./docs/images/apply-without-saving.png)
+![apply-without-saving](docs/images/apply-without-saving.png)
 
 
 ### Concrete example: show all changes and save modifications to Marlin firmware files
@@ -122,7 +119,7 @@ marlin-console-configurator apply ./Marlin -p ./ender-3-abl.yml --save
 ### Concrete example: Create a profile from your current config
 ```shell script
 marlin-console-configurator generate-profile ./Marlin -o ./my-new-profile.yml
-```
+``` 
 
 ## Usage
 
@@ -142,7 +139,7 @@ Usage: marlin-console-configurator [command] [command options]
             when present, the changes will be saved without prompting the user
             Default: false
 
-    diff      Display differences between marlin configuration files
+    diff      Display differences between two marlin configuration files/folders
       Usage: diff [options]
         Options:
         * --left
@@ -161,10 +158,8 @@ Usage: marlin-console-configurator [command] [command options]
       Usage: help
 ```
 
-## Tasks
-
-### Todo
-- Can create a backup.yaml when applying
+## A problem? 
+Please go to [Issues](/issues), find a similar issue, or create a new one with your problem. 
 
 ## Credits
 Made with :heart: by Chuckame
