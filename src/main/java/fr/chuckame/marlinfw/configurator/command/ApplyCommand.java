@@ -36,6 +36,8 @@ public class ApplyCommand implements Command {
     private boolean doSave;
     @Parameter(names = {"--yes", "-y"}, description = "when present, the changes will be saved without prompting the user")
     private boolean applyWithoutPrompt;
+    @Parameter(names = {"--verbose", "-v"}, description = "when present, all non-changed line are printed")
+    private boolean verbose;
 
     private final ProfileAdapter profileAdapter;
     private final LineChangeManager lineChangeManager;
@@ -81,7 +83,7 @@ public class ApplyCommand implements Command {
                                .doOnNext(change -> consoleHelper.writeLine(lineChangeFormatter.format(change), getChangeColor(change))),
                            Flux.fromIterable(fileChanges.getValue())
                                .filter(LineChange::isConstant)
-                               .filter(c -> c.getDiff() == LineChange.DiffEnum.DO_NOTHING)
+                               .filter(c -> verbose && c.getDiff() == LineChange.DiffEnum.DO_NOTHING)
                                .doOnNext(change -> consoleHelper.writeLine(lineChangeFormatter.format(change), getChangeColor(change))),
                            Mono.fromRunnable(consoleHelper::newLine)
                    ))
