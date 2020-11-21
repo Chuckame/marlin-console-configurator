@@ -9,8 +9,8 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ProfilePropertiesChangeAdapterTest {
-    private final ProfilePropertiesChangeAdapter changeAdapter = new ProfilePropertiesChangeAdapter();
+class ProfileAdapterTest {
+    private final ProfileAdapter profileAdapter = new ProfileAdapter();
 
     @Test
     void getWantedConstantsShouldReturnEmptyMapWhenEmptyEnabledAndEmptyDisabled() {
@@ -19,7 +19,7 @@ class ProfilePropertiesChangeAdapterTest {
                                              .disabled(List.of())
                                              .build();
 
-        final var wantedConstants = changeAdapter.profileToConstants(profile);
+        final var wantedConstants = profileAdapter.profileToConstants(profile);
 
         assertThat(wantedConstants).isEmpty();
     }
@@ -31,7 +31,7 @@ class ProfilePropertiesChangeAdapterTest {
                                              .disabled(List.of("c3", "c4"))
                                              .build();
 
-        final var wantedConstants = changeAdapter.profileToConstants(profile);
+        final var wantedConstants = profileAdapter.profileToConstants(profile);
 
         assertThat(wantedConstants)
                 .containsEntry("c1", Constant.builder().enabled(true).name("c1").value(null).build())

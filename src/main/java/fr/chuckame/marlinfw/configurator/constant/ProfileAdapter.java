@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class ProfilePropertiesChangeAdapter {
+public class ProfileAdapter {
     public Map<String, Constant> profileToConstants(final ProfileProperties profileProperties) {
         final var wantedChanges = new HashMap<String, Constant>();
         profileProperties.getDisabled().forEach(constantName -> wantedChanges.put(constantName, disabledConstant(constantName)));

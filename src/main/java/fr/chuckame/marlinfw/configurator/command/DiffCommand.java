@@ -7,9 +7,8 @@ import com.google.common.collect.Maps;
 import fr.chuckame.marlinfw.configurator.change.LineChangeFormatter;
 import fr.chuckame.marlinfw.configurator.change.LineChangeManager;
 import fr.chuckame.marlinfw.configurator.constant.Constant;
-import fr.chuckame.marlinfw.configurator.constant.ConstantLineInterpreter;
+import fr.chuckame.marlinfw.configurator.profile.ConstantHelper;
 import fr.chuckame.marlinfw.configurator.util.ConsoleHelper;
-import fr.chuckame.marlinfw.configurator.util.FileHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
@@ -17,7 +16,6 @@ import reactor.core.publisher.Mono;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
 @Component
 @Parameters(commandNames = "diff", commandDescription = "Display differences between marlin configuration files")
@@ -30,24 +28,15 @@ public class DiffCommand implements Command {
 
     private final LineChangeManager lineChangeManager;
     private final LineChangeFormatter lineChangeFormatter;
-    private final FileHelper fileHelper;
+    private final ConstantHelper constantHelper;
     private final ConsoleHelper consoleHelper;
-    private final ConstantLineInterpreter constantLineInterpreter;
 
     @Override
     public Mono<Void> run() {
-        return Mono.zip(getConstants(leftFiles), getConstants(rightFiles))
+        return Mono.zip(constantHelper.getConstants(leftFiles).collectMap(Constant::getName), constantHelper.getConstants(rightFiles).collectMap(Constant::getName))
                    .map(t -> Maps.difference(t.getT1(), t.getT2()))
                    .flatMap(this::printDiff)
                    .then();
-    }
-
-    private Mono<Map<String, Constant>> getConstants(final List<Path> files) {
-        return fileHelper.listFiles(files)
-                         .flatMap(fileHelper::lines)
-                         .flatMap(constantLineInterpreter::parseLine)
-                         .map(ConstantLineInterpreter.ParsedConstant::getConstant)
-                         .collectMap(Constant::getName);
     }
 
     private Mono<Void> printDiff(final MapDifference<String, Constant> diff) {

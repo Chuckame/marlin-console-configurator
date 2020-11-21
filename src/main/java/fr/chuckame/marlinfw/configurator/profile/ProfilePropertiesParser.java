@@ -14,6 +14,7 @@ import reactor.core.publisher.Mono;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Path;
+import java.util.List;
 
 import static com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature.INDENT_ARRAYS;
 import static com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature.MINIMIZE_QUOTES;
@@ -25,6 +26,12 @@ import static com.fasterxml.jackson.dataformat.yaml.YAMLGenerator.Feature.WRITE_
 public class ProfilePropertiesParser {
     private final ObjectMapper yamlParser = prepareYamlMapper();
     private final FileHelper fileHelper;
+
+    public Mono<ProfileProperties> parseFromFiles(final List<Path> profileFilePaths) {
+        return fileHelper.listFiles(profileFilePaths)
+                         .flatMap(this::parseFromFile)
+                         .reduceWith(ProfileProperties::new, ProfileProperties::merge);
+    }
 
     public Mono<ProfileProperties> parseFromFile(final Path profileFilePath) {
         return fileHelper.read(profileFilePath)
