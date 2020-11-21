@@ -122,11 +122,11 @@ class LineChangeValidatorTest {
     private static Stream<Arguments> getViolationShouldReturnNullArguments() {
         return Stream.of(
                 // SameEnabledConstantsIgnoringComment
-                Arguments.arguments(Constant.builder().name(CONSTANT_NAME).enabled(true).value(CONSTANT_VALUE).comment("comment1"),
-                                    Constant.builder().name(CONSTANT_NAME).enabled(true).value(CONSTANT_VALUE).comment("comment2")),
+                Arguments.arguments(Constant.builder().name(CONSTANT_NAME).enabled(true).value(CONSTANT_VALUE),
+                                    Constant.builder().name(CONSTANT_NAME).enabled(true).value(CONSTANT_VALUE)),
                 // SameDisabledConstantsIgnoringComment
-                Arguments.arguments(Constant.builder().name(CONSTANT_NAME).enabled(false).value(CONSTANT_VALUE).comment("comment1"),
-                                    Constant.builder().name(CONSTANT_NAME).enabled(false).value(CONSTANT_VALUE).comment("comment2")),
+                Arguments.arguments(Constant.builder().name(CONSTANT_NAME).enabled(false).value(CONSTANT_VALUE),
+                                    Constant.builder().name(CONSTANT_NAME).enabled(false).value(CONSTANT_VALUE)),
                 // E/v -> D/v
                 Arguments.arguments(Constant.builder().name(CONSTANT_NAME).enabled(true).value(CONSTANT_VALUE),
                                     Constant.builder().name(CONSTANT_NAME).enabled(false).value(CONSTANT_VALUE)),

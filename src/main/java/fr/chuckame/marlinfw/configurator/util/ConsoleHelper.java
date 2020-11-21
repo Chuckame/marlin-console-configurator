@@ -4,14 +4,50 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
+@SuppressWarnings("unused")//don't want to remove unused colors for the moment
 public class ConsoleHelper {
     private static final String RESET_COLOR = "\u001B[0m";
+
+    private final PrintStream consoleOutput;
+    private final PrintStream consoleErrorOutput;
+    private final InputStream consoleInput;
+
+    @SuppressWarnings("java:S106")// This is wanted to use serr/sout
+    public ConsoleHelper() {
+        consoleInput = System.in;
+        consoleOutput = System.out;
+        consoleErrorOutput = System.err;
+    }
+
+    public void writeLine(final String line, final ConsoleStyle... styles) {
+        consoleOutput.println(String.join("", Stream.of(styles).map(ConsoleStyle::getCode).collect(Collectors.joining("")), line, RESET_COLOR));
+    }
+
+    public void newLine() {
+        consoleOutput.println();
+    }
+
+    public void writeLine(final Consumer<StringBuilder> lineBuilder, final ConsoleStyle... styles) {
+        final var line = new StringBuilder();
+        lineBuilder.accept(line);
+        writeLine(line.toString(), styles);
+    }
+
+    public void writeErrorLine(final String line) {
+        consoleErrorOutput.println(line);
+    }
+
+    public String readLine() {
+        return new Scanner(consoleInput).next();
+    }
 
 
     public interface ConsoleStyle {
@@ -49,27 +85,5 @@ public class ConsoleHelper {
         ;
         @Getter
         private final String code;
-    }
-
-    public void writeLine(final String line, final ConsoleStyle... styles) {
-        System.out.println(String.join("", Stream.of(styles).map(ConsoleStyle::getCode).collect(Collectors.joining("")), line, RESET_COLOR));
-    }
-
-    public void newLine() {
-        System.out.println();
-    }
-
-    public void writeLine(final Consumer<StringBuilder> lineBuilder, final ConsoleStyle... styles) {
-        final var line = new StringBuilder();
-        lineBuilder.accept(line);
-        writeLine(line.toString(), styles);
-    }
-
-    public void writeErrorLine(final String line) {
-        System.err.println(line);
-    }
-
-    public String readLine() {
-        return new Scanner(System.in).next();
     }
 }

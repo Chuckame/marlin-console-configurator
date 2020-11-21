@@ -36,7 +36,6 @@ public class LineChange {
     @Builder
     public static class LineChangeConstant {
         private final String name;
-        private final String comment;
         private final String currentValue;
         @Nullable
         private String wantedValue;

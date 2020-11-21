@@ -70,7 +70,6 @@ public class LineChangeManager {
                          .lineNumber(lineNumber)
                          .constant(LineChange.LineChangeConstant.builder()
                                                                 .name(parsedConstant.getName())
-                                                                .comment(parsedConstant.getComment())
                                                                 .currentValue(parsedConstant.getValue())
                                                                 .wantedValue(Optional.ofNullable(wantedConstant).map(Constant::getValue).orElse(null))
                                                                 .build())

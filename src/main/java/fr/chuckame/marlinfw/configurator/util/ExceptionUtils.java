@@ -30,18 +30,4 @@ public class ExceptionUtils {
     public interface CheckedFunction<I, O> {
         O apply(I in) throws Exception;
     }
-
-    public static Runnable wrap(final CheckedRunnable runnable) {
-        return () -> {
-            try {
-                runnable.run();
-            } catch (final Exception e) {
-                throw Exceptions.propagate(e);
-            }
-        };
-    }
-
-    public interface CheckedRunnable {
-        void run() throws Exception;
-    }
 }

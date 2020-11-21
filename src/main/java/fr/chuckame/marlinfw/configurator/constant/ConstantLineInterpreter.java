@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 
 @Component
 public class ConstantLineInterpreter {
-    private static final Pattern CONSTANT_REGEX = Pattern.compile("^(?:\\h*(//))?\\h*#define\\h+(\\w+)(?:\\h+([^/\\h]+(?:\\h+[^/\\h]+)*))?\\h*(?://\\h*(.*))?$");
+    private static final Pattern CONSTANT_REGEX = Pattern.compile("^(?:\\h*(//))?\\h*#define\\h+(\\w+)(?:\\h+([^/\\h]+(?:\\h+[^/\\h]+)*))?\\h*(?://\\h*(?:.*))?$");
 
     @Data
     @Builder
@@ -59,7 +59,6 @@ public class ConstantLineInterpreter {
                                                .enabled(matcher.group(1) == null)
                                                .name(matcher.group(2))
                                                .value(trim(matcher.group(3)))
-                                               .comment(trim(matcher.group(4)))
                                                .build())
                              .constantLineDetails(ConstantLineDetails.builder()
                                                                      .line(matcher.group(0))

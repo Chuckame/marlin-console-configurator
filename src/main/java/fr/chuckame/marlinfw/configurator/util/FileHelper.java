@@ -26,8 +26,7 @@ public class FileHelper {
                        }
                        return Mono.just(path);
                    })
-                   .filter(Files::isRegularFile)
-                ;
+                   .filter(Files::isRegularFile);
     }
 
     private <T> Flux<T> toFlux(final Supplier<Spliterator<T>> iterator) {

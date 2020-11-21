@@ -13,6 +13,4 @@ public class Constant {
     private String name;
     @Nullable
     private String value;
-    @Nullable
-    private String comment;
 }
