@@ -73,17 +73,19 @@ public class ApplyCommand implements Command {
     private Mono<Void> printChanges(final Map<Path, List<LineChange>> changes) {
         return Flux.fromIterable(changes.entrySet())
                    .concatMap(fileChanges -> Flux.concat(
-                           Mono.fromRunnable(() -> consoleHelper
-                                   .writeLine(String.format("%s change(s) to apply for file %s:", fileChanges.getValue().stream().filter(this::isModifyingChange)
-                                                                                                             .count(), fileChanges
-                                                                    .getKey()), ConsoleHelper.FormatterEnum.UNDERLINED, ConsoleHelper.FormatterEnum.BOLD, ConsoleHelper.ForegroundColorEnum.GREEN)),
+                           Flux.fromIterable(fileChanges.getValue())
+                               .filter(this::isModifyingChange)
+                               .count()
+                               .filter(count -> verbose || count > 0)
+                               .doOnNext(count -> consoleHelper.writeLine(String.format("%s change(s) to apply for file %s:", count, fileChanges
+                                       .getKey()), ConsoleHelper.FormatterEnum.UNDERLINED, ConsoleHelper.FormatterEnum.BOLD, ConsoleHelper.ForegroundColorEnum.GREEN)),
                            Flux.fromIterable(fileChanges.getValue())
                                .filter(LineChange::isConstant)
-                               .filter(c -> c.getDiff() != LineChange.DiffEnum.DO_NOTHING)
+                               .filter(this::isModifyingChange)
                                .doOnNext(change -> consoleHelper.writeLine(lineChangeFormatter.format(change), getChangeColor(change))),
                            Flux.fromIterable(fileChanges.getValue())
                                .filter(LineChange::isConstant)
-                               .filter(c -> verbose && c.getDiff() == LineChange.DiffEnum.DO_NOTHING)
+                               .filter(c -> verbose && !isModifyingChange(c))
                                .doOnNext(change -> consoleHelper.writeLine(lineChangeFormatter.format(change), getChangeColor(change))),
                            Mono.fromRunnable(consoleHelper::newLine)
                    ))
