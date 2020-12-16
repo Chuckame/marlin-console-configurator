@@ -139,7 +139,7 @@ Usage: marlin-console-configurator [command] [command options]
             when present, the changes will be saved without prompting the user
             Default: false
 
-    diff      Display differences between two marlin configuration files/folders
+    diff      Display differences between marlin configuration files
       Usage: diff [options]
         Options:
         * --left
@@ -150,6 +150,9 @@ Usage: marlin-console-configurator [command] [command options]
     generate-profile      Generate a profile from given marlin constants files
       Usage: generate-profile [options] /path1 /path2 ...	The marlin constants folder or files paths
         Options:
+          --diff-from
+            The marlin constants folder or files paths from where you want to make a diff. If gathered, the generated profile will contains 
+            only the diff between those files and the command files
         * --output, -o
             The output profile path, will be overwritten if already existing file. If 'console' is specified, the profile will just be 
             printed to the console
