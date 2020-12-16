@@ -6,8 +6,7 @@ import fr.chuckame.marlinfw.configurator.change.LineChange;
 import fr.chuckame.marlinfw.configurator.change.LineChangeFormatter;
 import fr.chuckame.marlinfw.configurator.change.LineChangeManager;
 import fr.chuckame.marlinfw.configurator.constant.Constant;
-import fr.chuckame.marlinfw.configurator.constant.ProfilePropertiesChangeAdapter;
-import fr.chuckame.marlinfw.configurator.profile.ProfileProperties;
+import fr.chuckame.marlinfw.configurator.constant.ProfileAdapter;
 import fr.chuckame.marlinfw.configurator.profile.ProfilePropertiesParser;
 import fr.chuckame.marlinfw.configurator.util.ConsoleHelper;
 import fr.chuckame.marlinfw.configurator.util.FileHelper;
@@ -38,7 +37,7 @@ public class ApplyCommand implements Command {
     @Parameter(names = {"--yes", "-y"}, description = "when present, the changes will be saved without prompting the user")
     private boolean applyWithoutPrompt;
 
-    private final ProfilePropertiesChangeAdapter changeAdapter;
+    private final ProfileAdapter profileAdapter;
     private final LineChangeManager lineChangeManager;
     private final LineChangeFormatter lineChangeFormatter;
     private final ProfilePropertiesParser profilePropertiesParser;
@@ -47,19 +46,18 @@ public class ApplyCommand implements Command {
 
     @Override
     public Mono<Void> run() {
-        return fileHelper.listFiles(profilePaths)
-                         .flatMap(profilePropertiesParser::parseFromFile)
-                         .reduceWith(ProfileProperties::new, ProfileProperties::merge)
-                         .map(changeAdapter::profileToConstants)
-                         .flatMap(wantedConstants ->
-                                          prepareChanges(wantedConstants)
-                                                  .flatMap(changes -> printChanges(changes)
-                                                          .then(printUnusedConstants(changes, wantedConstants))
-                                                          .then(doSave ? checkIfUserAgree().then(applyAndSaveChanges(changes)) : Mono.empty()))
-                         );
+        return profilePropertiesParser
+                .parseFromFiles(profilePaths)
+                .map(profileAdapter::profileToConstants)
+                .flatMap(wantedConstants ->
+                                 prepareChanges(wantedConstants)
+                                         .flatMap(changes -> printChanges(changes)
+                                                 .then(printUnusedConstants(changes, wantedConstants))
+                                                 .then(applyAndSaveChangesIfNeeded(changes)))
+                );
     }
 
-    public Mono<Map<Path, List<LineChange>>> prepareChanges(final Map<String, Constant> wantedConstants) {
+    private Mono<Map<Path, List<LineChange>>> prepareChanges(final Map<String, Constant> wantedConstants) {
         return fileHelper.listFiles(filesPath)
                          .flatMap(filePath -> fileHelper.lines(filePath)
                                                         .index()
@@ -117,6 +115,13 @@ public class ApplyCommand implements Command {
                                 .then();
     }
 
+    private Mono<Void> applyAndSaveChangesIfNeeded(final Map<Path, List<LineChange>> changes) {
+        if (!doSave) {
+            return Mono.empty();
+        }
+        return checkIfUserAgree().then(applyAndSaveChanges(changes));
+    }
+
     private Mono<Void> checkIfUserAgree() {
         if (applyWithoutPrompt) {
             return Mono.empty();
@@ -128,7 +133,7 @@ public class ApplyCommand implements Command {
                    .then();
     }
 
-    public Mono<Void> applyAndSaveChanges(final Map<Path, List<LineChange>> changes) {
+    private Mono<Void> applyAndSaveChanges(final Map<Path, List<LineChange>> changes) {
         return Flux.fromIterable(changes.entrySet())
                    .filter(e -> onlyChangedFile(e.getValue()))
                    .groupBy(Map.Entry::getKey, Map.Entry::getValue)
@@ -144,7 +149,7 @@ public class ApplyCommand implements Command {
         return !LineChange.DiffEnum.DO_NOTHING.equals(change.getDiff());
     }
 
-    public Flux<String> applyChanges(final Collection<LineChange> changes) {
+    private Flux<String> applyChanges(final Collection<LineChange> changes) {
         return Flux.fromIterable(changes).flatMap(lineChangeManager::applyChange);
     }
 }
