@@ -135,6 +135,9 @@ Usage: marlin-console-configurator [command] [command options]
           --save, -s
             When is present, will save changes to files. Else, just display changes without saving
             Default: false
+          --verbose, -v
+            when present, all non-changed line are printed
+            Default: false
           --yes, -y
             when present, the changes will be saved without prompting the user
             Default: false
